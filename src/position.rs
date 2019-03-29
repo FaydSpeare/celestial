@@ -72,16 +72,16 @@ impl Position {
                     p.side = false;
                 }
                 else if c == 'k' && counter == 2 {
-                    p.c_rights |= 0b0010;
+                    p.c_rights |= 0b0100;
                 }
                 else if c == 'q' && counter == 2 {
-                    p.c_rights |= 0b0001;
-                }
-                else if c == 'K' && counter == 2 {
                     p.c_rights |= 0b1000;
                 }
+                else if c == 'K' && counter == 2 {
+                    p.c_rights |= 0b0001;
+                }
                 else if c == 'Q' && counter == 2 {
-                    p.c_rights |= 0b0100;
+                    p.c_rights |= 0b0010;
                 } else {
                     if counter == 3 {
                         if c == '-' {
@@ -114,13 +114,23 @@ impl Position {
                         }
                     }
                     else if counter == 5 {
-                        p.ply = match c.to_digit(10) {
-                            Some(t) => {
-                                (2*t - if p.side{2}else{1}) as i32
-                            }, 
-                            _ => panic!()
+                        if p.ply != 0 {
+                            p.ply = match c.to_digit(10) {
+                                Some(t) => {
+                                    (2*t + if !p.side{1}else{0}) as i32
+                                }, 
+                                _ => panic!()
+                            }
+                        } else {
+                            p.ply = match c.to_digit(10) {
+                                Some(t) => {
+                                    let x: u32 = ((p.ply + if p.side{2}else{1})/2) as u32;
+                                    (2*(t+10*x) - if !p.side{1}else{0}) as i32
+                                }, 
+                                _ => panic!()
+                            };
+                            counter += 1;
                         }
-                        
                     }
                 }
             }

@@ -12,7 +12,7 @@ use position::*;
 
 fn main() {
 
-    let p = Position::parse_fen("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
+    let p = Position::parse_fen("r1bq1rk1/p4ppp/1pn1pn2/8/2BP4/P1B2N2/1P3PPP/2RQK2R w K - 0 12");
 
     p.print();
 
