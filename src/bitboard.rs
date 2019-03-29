@@ -9,20 +9,21 @@ macro_rules! SET {($b: expr, $n: expr) => { is_set($b, $n)};}
 #[macro_export]
 macro_rules! CLEAR {($b: expr, $n: expr) => { is_clear($b, $n)};}
 
-pub fn display(b: Bitboard){
+pub fn display(b: &Bitboard){
+    println!();
     for i in (0..8).rev() {
         for j in 0..8 {
-            if SET!(b, 8*i + j){print!("x");}
+            if is_set(b, 8*i + j){print!("x");}
             else {print!("o");}
         }
         println!();
     }
 }
 
-pub fn is_set(b: Bitboard, n: usize) -> bool {
+pub fn is_set(b: &Bitboard, n: usize) -> bool {
     b & MASK[n] != 0
 }
 
-pub fn is_clear(b: Bitboard, n: usize) -> bool {
+pub fn is_clear(b: &Bitboard, n: usize) -> bool {
     b & MASK[n] == 0
 }
