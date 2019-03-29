@@ -7,6 +7,7 @@ pub struct Position {
 impl Position {
 
     pub fn print(&self){
+        println!();
         for i in (0..8).rev() {
             print!(" {} ", i+1);
             for _j in 0..8 {
