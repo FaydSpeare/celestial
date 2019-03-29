@@ -3,7 +3,10 @@
 
 use crate::types::*;
 
+#[macro_export]
 macro_rules! SET {($b: expr, $n: expr) => { is_set($b, $n)};}
+
+#[macro_export]
 macro_rules! CLEAR {($b: expr, $n: expr) => { is_clear($b, $n)};}
 
 pub fn display(b: Bitboard){

@@ -1,15 +1,20 @@
 #![allow(unused_imports)]
 
 mod types;
-
-#[macro_use]
 mod bitboard;
+mod position;
 
 use types::*;
 use bitboard::*;
+use position::*;
+
 
 fn main() {
 
-    display(0b1000);
+    let pos = Position {
+        bit: 0b0
+    };
+
+    pos.print();
 
 }
