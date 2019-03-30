@@ -27,6 +27,11 @@ impl Position {
             MoveFlag::NONE => {
                 self.piece_boards[p] ^= MASK[o];
                 self.piece_boards[p] |= MASK[d];
+
+                self.side_boards[WHITE] ^= MASK[o];
+                self.side_boards[WHITE] |= MASK[d];
+
+                self.side_boards[BOTH] = self.side_boards[WHITE] | self.side_boards[BLACK];
             },
             MoveFlag::PROMOTION => {
 
