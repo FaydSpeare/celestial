@@ -27,7 +27,7 @@ pub struct Position {
     pub history: [UndoEntry; MAX_GAME_MOVES],
 
     // Piece List
-    pub piece_list: [[i32; 12]; 10]
+    //pub piece_list: [[i32; 12]; 10]
 }
 
 pub struct UndoEntry {
@@ -39,8 +39,6 @@ pub struct UndoEntry {
     pub fifty: i32,
     pub pos_key: Key
 }
-
-impl Position {
 
 /*
     pub fn print(&self){
@@ -76,5 +74,3 @@ impl Position {
     }
 
 */
-
-}
