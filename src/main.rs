@@ -13,5 +13,5 @@ use movegen::*;
 
 
 fn main() {
-
+    assert!()
 }

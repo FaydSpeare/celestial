@@ -23,7 +23,11 @@ pub struct Position {
     pub maj_piece: [i32; 3],
     pub min_piece: [i32; 3],
 
-    pub history: [UndoEntry; MAX_GAME_MOVES]
+    // Move History
+    pub history: [UndoEntry; MAX_GAME_MOVES],
+
+    // Piece List
+    pub piece_list: [[i32; 12]; 10]
 }
 
 pub struct UndoEntry {
