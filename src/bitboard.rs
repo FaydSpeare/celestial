@@ -3,12 +3,12 @@
 
 use crate::types::*;
 
-pub fn display(b: &Bitboard){
+pub fn print_bb(b: &Bitboard){
     println!();
     for i in (0..8).rev() {
         for j in 0..8 {
-            if is_set(b, 8*i + j){print!("x");}
-            else {print!("o");}
+            if is_set(b, 8*i + j){print!("X ");}
+            else {print!("- ");}
         }
         println!();
     }

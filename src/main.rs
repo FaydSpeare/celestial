@@ -1,12 +1,14 @@
 #![allow(unused_imports)]
 
+#[macro_use]
+mod macros;
+
 mod types;
 mod bitboard;
 mod position;
 mod movegen;
 
-#[macro_use]
-mod macros;
+
 
 use types::*;
 use bitboard::*;
@@ -17,5 +19,6 @@ use movegen::*;
 
 fn main() {
 
+    print_bb(&MASK[2]);
 
 }
