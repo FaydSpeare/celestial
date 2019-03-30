@@ -8,6 +8,8 @@ pub type Key = u64;
 
 /* Useful Constants */
 
+pub const MAX_GAME_MOVES: usize = 2048;
+
 pub const BOARD_NUM: usize = 64;
 pub const PIECE_NUM: usize = 6;
 pub const COLOUR_NUM: usize = 2;
@@ -43,7 +45,7 @@ pub enum Square {
 }
 
 pub enum Castling {
-    W_OO, W_OOO, B_OO, B_OOO
+    W_OO = 1, W_OOO = 2, B_OO = 4, B_OOO = 8
 }
 
 /* Useful Arrays */

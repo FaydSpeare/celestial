@@ -11,7 +11,7 @@ pub struct Position {
     pub fifty: i32,
     pub ep: i32,
 
-    pub castling_rights: u16,
+    pub castling_rights: u8,
 
     pub ply: i32,
 
@@ -21,7 +21,19 @@ pub struct Position {
 
     pub big_piece: [i32; 3],
     pub maj_piece: [i32; 3],
-    pub min_piece: [i32; 3]
+    pub min_piece: [i32; 3],
+
+    pub history: [UndoEntry; MAX_GAME_MOVES]
+}
+
+pub struct UndoEntry {
+
+    // Information to roll back
+    pub motion: i32,
+    pub castling_rights: u8,
+    pub ep: i32,
+    pub fifty: i32,
+    pub pos_key: Key
 }
 
 impl Position {
