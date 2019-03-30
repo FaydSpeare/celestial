@@ -19,6 +19,27 @@ pub struct Position {
 
 impl Position {
 
+    pub fn make_move(&mut self, m: Move){
+        let p = m.piece as usize;
+        let o = m.origin as usize;
+        let d = m.dest as usize;
+        match m.flag {
+            MoveFlag::NONE => {
+                self.piece_boards[p] ^= MASK[o];
+                self.piece_boards[p] |= MASK[d];
+            },
+            MoveFlag::PROMOTION => {
+
+            },
+            MoveFlag::CASTLING => {
+
+            },
+            MoveFlag::ENPASSANT => {
+
+            }
+        }
+    }
+
     pub fn parse_fen(fen: &str) -> Position {
 
         let mut p = Position {

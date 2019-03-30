@@ -13,9 +13,21 @@ use movegen::*;
 
 
 fn main() {
-    let p = Position::parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    let mut p = Position::parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    
+    
     p.print();
 
-    white_pawn_moves(&p);
+    let m = Move {
+        piece: Piece::W_KNIGHT,
+        origin: 1,
+        dest: 18,
+        promote: Major::NONE,
+        flag: MoveFlag::NONE
+    };
+
+    p.make_move(m);
+
+    p.print();
 
 }

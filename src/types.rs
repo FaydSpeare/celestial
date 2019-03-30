@@ -8,10 +8,11 @@ pub fn print(value: i32){
 }
 
 pub struct Move {
-    origin: i32,
-    dest: i32,
-    promote: Major,
-    flag: MoveFlag
+    pub piece: Piece,
+    pub origin: i32,
+    pub dest: i32,
+    pub promote: Major,
+    pub flag: MoveFlag
 }
 
 pub enum MoveFlag {
@@ -19,13 +20,18 @@ pub enum MoveFlag {
 }
 
 pub enum Major {
-    KNIGHT, BISHOP, ROOK, QUEEN
+    KNIGHT, BISHOP, ROOK, QUEEN, NONE
 }
 
 pub const WHITE: usize = 0;
 pub const BLACK: usize = 1;
 pub const BOTH: usize = 2;
 
+
+pub enum Piece {
+    W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING, 
+    B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING
+}
 
 pub enum Rank {
     RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8
