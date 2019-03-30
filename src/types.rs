@@ -70,6 +70,11 @@ pub const CLR_MASK: [u64; 64] = [0xfffffffffffffffe, 0xfffffffffffffffd, 0xfffff
 0xfffeffffffffffff, 0xfffdffffffffffff, 0xfffbffffffffffff, 0xfff7ffffffffffff, 0xffefffffffffffff, 0xffdfffffffffffff, 0xffbfffffffffffff, 0xff7fffffffffffff,
 0xfeffffffffffffff, 0xfdffffffffffffff, 0xfbffffffffffffff, 0xf7ffffffffffffff, 0xefffffffffffffff, 0xdfffffffffffffff, 0xbfffffffffffffff, 0x7fffffffffffffff];
 
+pub const PIECE_BIG: [bool; 13] = [false, true, true, true, true, true, false, true, true, true, true, true, false];
+pub const PIECE_MAJOR: [bool; 13] = [false, false, false, true, true, true, false, false, false, true, true, true, false];
+pub const PIECE_MINOR: [bool; 13] = [false, true, true, false, false, false, false, true, true, false, false, false, false];
+pub const PIECE_COLOUR: [i32; 13] = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2];
+pub const PIECE_VALUE: [i32; 13] = [100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000, 0];
 
 pub static mut PIECE_KEYS: [[u64; 64]; 13] = [[0u64; 64]; 13];
 pub static mut COLOUR_KEY: u64 = 0u64;
