@@ -15,9 +15,9 @@ pub fn print_bb(b: &Bitboard){
 }
 
 pub fn is_set(b: &Bitboard, n: usize) -> bool {
-    b & MASK[n] != 0
+    b & SET_MASK[n] != 0
 }
 
 pub fn is_clear(b: &Bitboard, n: usize) -> bool {
-    b & MASK[n] == 0
+    b & SET_MASK[n] == 0
 }
