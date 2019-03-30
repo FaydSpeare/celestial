@@ -7,6 +7,26 @@ pub fn print(value: i32){
     println!("{}", value);
 }
 
+pub struct Move {
+    origin: i32,
+    dest: i32,
+    promote: Major,
+    flag: MoveFlag
+}
+
+pub enum MoveFlag {
+    NONE, PROMOTION, ENPASSANT, CASTLING
+}
+
+pub enum Major {
+    KNIGHT, BISHOP, ROOK, QUEEN
+}
+
+pub const WHITE: usize = 0;
+pub const BLACK: usize = 1;
+pub const BOTH: usize = 2;
+
+
 pub enum Rank {
     RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8
 }

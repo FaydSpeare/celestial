@@ -8,7 +8,8 @@ pub const CASTLING: [char; 4] = ['K','Q','k','q'];
 pub const FILES: [char; 8] = ['a','b','c','d','e','f','g','h'];
 
 pub struct Position {
-    pub bit: [Bitboard; 12],
+    pub piece_boards: [Bitboard; 12],
+    pub side_boards: [Bitboard; 3],
     pub side: bool,
     pub c_rights: u16,
     pub ply: i32,
@@ -18,10 +19,11 @@ pub struct Position {
 
 impl Position {
 
-    pub fn parse_fen2(fen: &str) -> Position {
+    pub fn parse_fen(fen: &str) -> Position {
 
         let mut p = Position {
-            bit: [0b0; 12],
+            piece_boards: [0b0; 12],
+            side_boards: [0b0; 3],
             side: true,
             c_rights: 0,
             ply: 0,
@@ -40,7 +42,7 @@ impl Position {
             for i in 0..12 {
                 if c == PIECES[i] {
                     is_piece = true;
-                    p.bit[i] |= 1 << ((63-pos)/8)*8 + (7-((63-pos)%8));
+                    p.piece_boards[i] |= 1 << ((63-pos)/8)*8 + (7-((63-pos)%8));
                     pos += 1;
                     break;
                 }
@@ -147,128 +149,22 @@ impl Position {
             }
         }
         
+        let mut white: u64 = 0b0;
+        let mut black: u64 = 0b0;
+        let mut all: u64 = 0b0;
 
-        p
-    }
-
-    pub fn parse_fen(fen: &str) -> Position {
-        let mut p = Position {
-            bit: [0b0; 12],
-            side: true,
-            c_rights: 0,
-            ply: 0,
-            fifty: 0,
-            ep: -1
-        };
-
-        let mut pos = 0;
-        let mut pieces = true;
-        let mut counter = 0;
-        let mut ep: i32 = -1;
-
-        for c in fen.chars(){
-            //println!("{}", c);
-
-            if pieces {
-                let mut piece = true;
-            
-                for i in 0..12 {
-                    if c == PIECES[i] {
-                        piece = false;
-                        p.bit[i] |= 1 << ((63-pos)/8)*8 + (7-((63-pos)%8));
-                        break;
-                    }
-                }
-
-                if piece {
-                    if c != '/' {
-                        match c.to_digit(10) {
-                            Some(t) => {
-                                if pos + t < 64 {
-                                    pos += t;
-                                } else {pieces = false}
-                            }, 
-                            _ => ()
-                        }
-                    } 
-                } else { if pos + 1 < 64 {pos += 1} else {pieces = false}}
-            }
-            else {
-                if c == ' ' {
-                    counter += 1;
-                    continue
-                }
-                else if c == 'w' && counter == 1 {
-                    p.side = true;
-                }
-                else if c == 'b' && counter == 1 {
-                    p.side = false;
-                }
-                else if c == 'k' && counter == 2 {
-                    p.c_rights |= 0b0100;
-                }
-                else if c == 'q' && counter == 2 {
-                    p.c_rights |= 0b1000;
-                }
-                else if c == 'K' && counter == 2 {
-                    p.c_rights |= 0b0001;
-                }
-                else if c == 'Q' && counter == 2 {
-                    p.c_rights |= 0b0010;
-                } else {
-                    if counter == 3 {
-                        if c == '-' {
-                            continue
-                        } 
-                        let mut n = true;
-                        for m in 0..8 {
-                            if FILES[m] == c {
-                                ep += 1 + (m as i32);
-                                n = false;
-                                break;
-                            }
-                        }
-                        if n {
-                            p.ep= match c.to_digit(10) {
-                                Some(t) => {
-                                    ep += 8*((t as i32)-1);
-                                    ep
-                                }, 
-                                _ => panic!()
-                            }
-                        }
-                    }
-                    else if counter == 4 {
-                        p.fifty= match c.to_digit(10) {
-                            Some(t) => {
-                                t as i32
-                            }, 
-                            _ => panic!()
-                        }
-                    }
-                    else if counter == 5 {
-                        if p.ply != 0 {
-                            p.ply = match c.to_digit(10) {
-                                Some(t) => {
-                                    (2*t + if !p.side{1}else{0}) as i32
-                                }, 
-                                _ => panic!()
-                            }
-                        } else {
-                            p.ply = match c.to_digit(10) {
-                                Some(t) => {
-                                    let x: u32 = ((p.ply + if p.side{2}else{1})/2) as u32;
-                                    (2*(t+10*x) - if !p.side{1}else{0}) as i32
-                                }, 
-                                _ => panic!()
-                            };
-                            counter += 1;
-                        }
-                    }
-                }
-            }
+        for i in 0..6 {
+            white |= p.piece_boards[i];
         }
+        for i in 6..12 {
+            black |= p.piece_boards[i];
+        }
+        
+        all |= (white | black);
 
+        p.side_boards[0] = white;
+        p.side_boards[1] = black;
+        p.side_boards[2] = all;
 
         p
     }
@@ -280,7 +176,7 @@ impl Position {
             for j in 0..8 {
                 let mut p = true;
                 for k in 0..12 {
-                    if is_set(&self.bit[k], 8*i + j){
+                    if is_set(&self.piece_boards[k], 8*i + j){
                         print!("{} ", PIECES[k]);
                         p = false;
                         break;
@@ -302,7 +198,7 @@ impl Position {
         println!();
         println!("_____ply: {}", self.ply);
         println!("___fifty: {}", self.fifty);
-        println!("______ep: {}", self.ep);
+        println!("______ep: {}\n", self.ep);
     }
 
 }
