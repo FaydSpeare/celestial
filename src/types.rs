@@ -1,36 +1,26 @@
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]
 
+/* Useful Type Definitions */
+
 pub type Bitboard = u64;
+pub type Key = u64;
 
-pub fn print(value: i32){
-    println!("{}", value);
+/* Useful Constants */
+
+pub const BOARD_NUM: usize = 64;
+pub const PIECE_NUM: usize = 6;
+pub const COLOUR_NUM: usize = 2;
+
+/* Useful Enums */
+
+pub enum Colour {
+    WHITE, BLACK, BOTH
 }
-
-pub struct Move {
-    pub piece: Piece,
-    pub origin: i32,
-    pub dest: i32,
-    pub promote: Major,
-    pub flag: MoveFlag
-}
-
-pub enum MoveFlag {
-    NONE, PROMOTION, ENPASSANT, CASTLING
-}
-
-pub enum Major {
-    KNIGHT, BISHOP, ROOK, QUEEN, NONE
-}
-
-pub const WHITE: usize = 0;
-pub const BLACK: usize = 1;
-pub const BOTH: usize = 2;
-
 
 pub enum Piece {
     W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING, 
-    B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING
+    B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING, EMPTY
 }
 
 pub enum Rank {
@@ -38,7 +28,7 @@ pub enum Rank {
 }
 
 pub enum File {
-    FILE_1, FILE_2, FILE_3, FILE_4, FILE_5, FILE_6, FILE_7, FILE_8
+    FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H
 }
 
 pub enum Square {
@@ -51,6 +41,12 @@ pub enum Square {
     G1, G2, G3, G4, G5, G6, G7, G8,
     H1, H2, H3, H4, H5, H6, H7, H8, NO_SQ = -1
 }
+
+pub enum Castling {
+    W_OO, W_OOO, B_OO, B_OOO
+}
+
+/* Useful Arrays */
 
 pub const MASK: [u64; 64] = [0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000,
