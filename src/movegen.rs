@@ -389,3 +389,103 @@ pub fn gen_black_bishop_moves(motion_list: &mut Vec<Motion>, position: &Position
     }
 }
 
+//# ROOKS #// 
+
+pub fn gen_white_rook_moves(motion_list: &mut Vec<Motion>, position: &Position){
+
+    for i in 0..(position.piece_num[Piece::W_ROOK as usize]) {
+        let current = position.piece_list[Piece::W_ROOK as usize][i as usize] as usize;
+
+        let mut rook_moves = flat_sliding_attacks(current, position.colour_bb[Colour::BOTH as usize]) & !position.colour_bb[Colour::WHITE as usize];
+
+        while rook_moves != 0 {
+            let next = LSB!(rook_moves) as usize;
+
+            add_rook_motion(motion_list, current, next);
+
+            rook_moves ^= 1 << next;
+        }
+    }
+}
+
+pub fn gen_black_rook_moves(motion_list: &mut Vec<Motion>, position: &Position){
+
+    for i in 0..(position.piece_num[Piece::B_ROOK as usize]) {
+        let current = position.piece_list[Piece::B_ROOK as usize][i as usize] as usize;
+
+        let mut rook_moves = flat_sliding_attacks(current, position.colour_bb[Colour::BOTH as usize]) & !position.colour_bb[Colour::BLACK as usize];
+
+        while rook_moves != 0 {
+            let next = LSB!(rook_moves) as usize;
+
+            add_rook_motion(motion_list, current, next);
+
+            rook_moves ^= 1 << next;
+        }
+    }
+}
+
+//# QUEENS #//
+pub fn gen_white_queen_moves(motion_list: &mut Vec<Motion>, position: &Position){
+
+    for i in 0..(position.piece_num[Piece::W_QUEEN as usize]) {
+        let current = position.piece_list[Piece::W_QUEEN as usize][i as usize] as usize;
+
+        let mut queen_moves = sliding_attacks(current, position.colour_bb[Colour::BOTH as usize]) & !position.colour_bb[Colour::WHITE as usize];
+
+        while queen_moves != 0 {
+            let next = LSB!(queen_moves) as usize;
+
+            add_queen_motion(motion_list, current, next);
+
+            queen_moves ^= 1 << next;
+        }
+    }
+}
+
+pub fn gen_black_queen_moves(motion_list: &mut Vec<Motion>, position: &Position){
+
+    for i in 0..(position.piece_num[Piece::B_QUEEN as usize]) {
+        let current = position.piece_list[Piece::B_QUEEN as usize][i as usize] as usize;
+
+        let mut queen_moves = sliding_attacks(current, position.colour_bb[Colour::BOTH as usize]) & !position.colour_bb[Colour::BLACK as usize];
+
+        while queen_moves != 0 {
+            let next = LSB!(queen_moves) as usize;
+
+            add_queen_motion(motion_list, current, next);
+
+            queen_moves ^= 1 << next;
+        }
+    }
+}
+
+//# KING #//
+
+pub fn gen_white_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
+    
+    let mut king_moves = KING_MOVES[current] & !position.colour_bb[Colour::WHITE as usize];
+
+        while king_moves != 0 {
+            let next = LSB!(king_moves) as usize;
+
+            add_knight_motion(motion_list, current, next);
+
+            king_moves ^= 1 << next;
+        }
+}
+
+pub fn gen_black_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
+    
+    let mut king_moves = KING_MOVES[current] & !position.colour_bb[Colour::BLACK as usize];
+
+        while king_moves != 0 {
+            let next = LSB!(king_moves) as usize;
+
+            add_knight_motion(motion_list, current, next);
+
+            king_moves ^= 1 << next;
+        }
+}
+
+        

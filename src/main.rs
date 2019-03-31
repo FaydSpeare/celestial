@@ -49,9 +49,9 @@ fn main() {
 
     let mut list: Vec<Motion> = vec![];
     //gen_black_pawn_moves(&mut list, &p);
-    //gen_black_bishop_moves(&mut list, &p);
+    gen_white_bishop_moves(&mut list, &p);
 
-    print_bb(&sliding_attacks(0, p.colour_bb[Colour::BOTH as usize]));
+    //print_bb(&sliding_attacks(0, p.colour_bb[Colour::BOTH as usize]));
     println!("{}", list.len());
 
     for m in list.iter() {
