@@ -66,17 +66,12 @@ pub fn flat_sliding_attacks(sq: usize, occ: u64) -> u64 {
 }
 
 pub fn horizontal_sliding_attacks(sq: usize, occ: u64) -> u64 {
-    let foc: u64 = (occ | FILE_MASK[0] | FILE_MASK[7]) & RANK_MASK[sq/8];
-    let right: u64 = (foc - 2*SET_MASK[sq]);
-    let left: u64 = (foc.rbit() - 2*SET_MASK[sq].rbit()).rbit();
-    (right ^ left) & RANK_MASK[sq/8]
+    ((occ-SET_MASK[sq].wrapping_mul(2)) ^ (occ.rbit()-SET_MASK[sq].rbit().wrapping_mul(2)).rbit()) & RANK_MASK[sq/8]
 }
 
 pub fn vertical_sliding_attacks(sq: usize, occ: u64) -> u64 {
-    let foc: u64 = (occ | RANK_MASK[0] | RANK_MASK[7]) & FILE_MASK[sq%8];
-    let right: u64 = (foc - 2*SET_MASK[sq]);
-    let left: u64 = (foc.rbit() - 2*SET_MASK[sq].rbit()).rbit();
-    (right ^ left) & FILE_MASK[sq%8]
+    let occ = occ & FILE_MASK[sq%8];
+    ((occ-SET_MASK[sq].wrapping_mul(2)) ^ (occ.rbit()-SET_MASK[sq].rbit().wrapping_mul(2)).rbit()) & FILE_MASK[sq%8]
 }
 
 pub fn diag_sliding_attacks(sq: usize, occ: u64) -> u64 {
@@ -84,16 +79,16 @@ pub fn diag_sliding_attacks(sq: usize, occ: u64) -> u64 {
 }
 
 pub fn diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
-    let foc: u64 = (occ | RANK_MASK[0] | RANK_MASK[7] | FILE_MASK[0] | FILE_MASK[7]) & DIAG_MASK[(sq/8)+(sq%8)];
-    let right: u64 = (foc - 2*SET_MASK[sq]);
-    let left: u64 = (foc.rbit() - 2*SET_MASK[sq].rbit()).rbit();
+    let foc: u64 = (occ | RANK_MASK[0] | FILE_MASK[7] | RANK_MASK[7] | FILE_MASK[0]) & DIAG_MASK[(sq/8)+(sq%8)];
+    let right: u64 = (foc.wrapping_sub(SET_MASK[sq].wrapping_mul(2)));
+    let left: u64 = (foc.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit();
     (right ^ left) & DIAG_MASK[(sq/8)+(sq%8)]
 }
 
 pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
     let foc: u64 = (occ | RANK_MASK[0] | RANK_MASK[7] | FILE_MASK[0] | FILE_MASK[7]) & ANTI_DIAG_MASK[(sq/8)+7-(sq%8)];
-    let right: u64 = (foc - 2*SET_MASK[sq]);
-    let left: u64 = (foc.rbit() - 2*SET_MASK[sq].rbit()).rbit();
+    let right: u64 = (foc.wrapping_sub(SET_MASK[sq].wrapping_mul(2)));
+    let left: u64 = (foc.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit();
     (right ^ left) & ANTI_DIAG_MASK[(sq/8)+7-(sq%8)]
 }
 
@@ -192,10 +187,8 @@ pub fn add_king_castling_motion(motion_list: &mut Vec<Motion>, from: usize, to: 
 
 pub fn gen_white_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) {
 
-    let mut w_pawns = position.piece_bb[Piece::W_PAWN as usize].clone();
-
-    while w_pawns != 0 {
-        let current = LSB!(w_pawns) as usize;
+    for i in 0..(position.piece_num[Piece::W_PAWN as usize]) {
+        let current = position.piece_list[Piece::W_PAWN as usize][i as usize] as usize;
 
         if current / 8 == Rank::RANK_2 as usize {
 
@@ -254,19 +247,14 @@ pub fn gen_white_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
                 add_pawn_enpassant_motion(motion_list, current, current + 7)
             }
         }
-        
-
-        w_pawns ^= 1 << current;
     }
 
 }
 
 pub fn gen_black_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) {
 
-    let mut b_pawns = position.piece_bb[Piece::B_PAWN as usize].clone();
-
-    while b_pawns != 0 {
-        let current = LSB!(b_pawns) as usize;
+    for i in 0..(position.piece_num[Piece::B_PAWN as usize]) {
+        let current = position.piece_list[Piece::B_PAWN as usize][i as usize] as usize;
 
         if current / 8 == Rank::RANK_7 as usize {
 
@@ -325,9 +313,6 @@ pub fn gen_black_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
                 add_pawn_enpassant_motion(motion_list, current, current - 7)
             }
         }
-        
-
-        b_pawns ^= 1 << current;
     }
 
 }
@@ -335,10 +320,9 @@ pub fn gen_black_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
 //# KNIGHTS #//
 
 pub fn gen_white_knight_moves(motion_list: &mut Vec<Motion>, position: &Position){
-    let mut w_knights = position.piece_bb[Piece::W_KNIGHT as usize].clone();
 
-    while w_knights != 0 {
-        let current = LSB!(w_knights) as usize;
+    for i in 0..(position.piece_num[Piece::W_KNIGHT as usize]) {
+        let current = position.piece_list[Piece::W_KNIGHT as usize][i as usize] as usize;
 
         let mut kn_moves = KN_MOVES[current] & !position.colour_bb[Colour::WHITE as usize];
 
@@ -349,16 +333,13 @@ pub fn gen_white_knight_moves(motion_list: &mut Vec<Motion>, position: &Position
 
             kn_moves ^= 1 << next;
         }
-
-        w_knights ^= 1 << current;
     }
 }
 
 pub fn gen_black_knight_moves(motion_list: &mut Vec<Motion>, position: &Position){
-    let mut b_knights = position.piece_bb[Piece::B_KNIGHT as usize].clone();
 
-    while b_knights != 0 {
-        let current = LSB!(b_knights) as usize;
+    for i in 0..(position.piece_num[Piece::B_KNIGHT as usize]) {
+        let current = position.piece_list[Piece::B_KNIGHT as usize][i as usize] as usize;
 
         let mut kn_moves = KN_MOVES[current] & !position.colour_bb[Colour::BLACK as usize];
 
@@ -369,9 +350,42 @@ pub fn gen_black_knight_moves(motion_list: &mut Vec<Motion>, position: &Position
 
             kn_moves ^= 1 << next;
         }
-
-        b_knights ^= 1 << current;
     }
 }
 
+//# BISHOPS #//
+
+pub fn gen_white_bishop_moves(motion_list: &mut Vec<Motion>, position: &Position){
+
+    for i in 0..(position.piece_num[Piece::W_BISHOP as usize]) {
+        let current = position.piece_list[Piece::W_BISHOP as usize][i as usize] as usize;
+
+        let mut bishop_moves = diag_sliding_attacks(current, position.colour_bb[Colour::BOTH as usize]) & !position.colour_bb[Colour::WHITE as usize];
+
+        while bishop_moves != 0 {
+            let next = LSB!(bishop_moves) as usize;
+
+            add_bishop_motion(motion_list, current, next);
+
+            bishop_moves ^= 1 << next;
+        }
+    }
+}
+
+pub fn gen_black_bishop_moves(motion_list: &mut Vec<Motion>, position: &Position){
+
+    for i in 0..(position.piece_num[Piece::B_BISHOP as usize]) {
+        let current = position.piece_list[Piece::B_BISHOP as usize][i as usize] as usize;
+
+        let mut bishop_moves = diag_sliding_attacks(current, position.colour_bb[Colour::BOTH as usize]) & !position.colour_bb[Colour::BLACK as usize];
+
+        while bishop_moves != 0 {
+            let next = LSB!(bishop_moves) as usize;
+
+            add_bishop_motion(motion_list, current, next);
+
+            bishop_moves ^= 1 << next;
+        }
+    }
+}
 

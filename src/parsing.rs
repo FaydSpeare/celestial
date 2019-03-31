@@ -72,7 +72,7 @@ pub fn parse_fen_string(fen_string: &str) -> Position {
     if c != '-' {
         let mut square = 0;
         for i in 0..8 {
-            if FILES[i] == 'c' {
+            if FILES[i] == c {
                 square += i as i32;
                 break;
             }
