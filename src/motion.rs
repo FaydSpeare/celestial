@@ -36,6 +36,23 @@ impl Motion {
     pub fn is_none(&self) -> bool {
         self.flag() == Flag::NONE as u16
     }
+
+    pub fn is_prom_queen(&self) -> bool {
+        self.promotee == Promotee::QUEEN as u16
+    }
+
+    pub fn is_prom_rook(&self) -> bool {
+        self.promotee == Promotee::ROOK as u16
+    }
+
+    pub fn is_prom_bishop(&self) -> bool {
+        self.promotee == Promotee::BISHOP as u16
+    }
+
+    pub fn is_prom_knight(&self) -> bool {
+        self.promotee == Promotee::KNIGHT as u16
+    }
+
 }
 
 /* Enum for Flags */

@@ -52,8 +52,6 @@ pub const ANTI_DIAG_MASK: [u64; 15] = [0x80, 0x8040, 0x804020, 0x80402010, 0x804
                     0x8040201008040201, 0x4020100804020100, 0x2010080402010000, 0x1008040201000000,
                     0x804020100000000, 0x402010000000000, 0x201000000000000, 0x100000000000000];
 
-
-
 /* SLIDING ATTACKS */
 
 pub fn sliding_attacks(sq: usize, occ: u64) -> u64 {
@@ -95,4 +93,8 @@ pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
     let left: u64 = (foc.rbit() - 2*SET_MASK[sq].rbit()).rbit();
     (right ^ left) & ANTI_DIAG_MASK[(sq/8)+7-(sq%8)]
 }
+
+/* MOVE GENERTATION */
+
+
 
