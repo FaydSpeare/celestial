@@ -29,7 +29,7 @@ use attack::*;
 
 fn main() {
     init();
-    let mut p = parse_fen_string("rnbqkbnr/pppppppp/8/6p1/8/8/PPPPPPPP/RNBQKBNR w KQkq c6 0 1");
+    let mut p = parse_fen_string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq c6 0 1");
     print(&p);
 
     let m = Motion {
@@ -43,6 +43,5 @@ fn main() {
 
     print_bb(&sliding_attacks( 38, p.colour_bb[2]));
 
-    
 }
 
