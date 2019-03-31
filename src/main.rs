@@ -36,6 +36,6 @@ fn main() {
         score: 0
     };
 
-    println!("{}", m.from());
+    println!("{}", is_attacked_by(&p, 32, false));
 
 }
