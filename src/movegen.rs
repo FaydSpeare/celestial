@@ -66,12 +66,12 @@ pub fn flat_sliding_attacks(sq: usize, occ: u64) -> u64 {
 }
 
 pub fn horizontal_sliding_attacks(sq: usize, occ: u64) -> u64 {
-    ((occ-SET_MASK[sq].wrapping_mul(2)) ^ (occ.rbit()-SET_MASK[sq].rbit().wrapping_mul(2)).rbit()) & RANK_MASK[sq/8]
+    ((occ.wrapping_sub(SET_MASK[sq].wrapping_mul(2))) ^ (occ.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit()) & RANK_MASK[sq/8]
 }
 
 pub fn vertical_sliding_attacks(sq: usize, occ: u64) -> u64 {
     let occ = occ & FILE_MASK[sq%8];
-    ((occ-SET_MASK[sq].wrapping_mul(2)) ^ (occ.rbit()-SET_MASK[sq].rbit().wrapping_mul(2)).rbit()) & FILE_MASK[sq%8]
+    ((occ.wrapping_sub(SET_MASK[sq].wrapping_mul(2))) ^ (occ.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit()) & FILE_MASK[sq%8]
 }
 
 pub fn diag_sliding_attacks(sq: usize, occ: u64) -> u64 {
@@ -463,29 +463,60 @@ pub fn gen_black_queen_moves(motion_list: &mut Vec<Motion>, position: &Position)
 //# KING #//
 
 pub fn gen_white_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
-    
+    let current = position.king_sq[Colour::WHITE as usize] as usize;
     let mut king_moves = KING_MOVES[current] & !position.colour_bb[Colour::WHITE as usize];
 
-        while king_moves != 0 {
-            let next = LSB!(king_moves) as usize;
+    while king_moves != 0 {
+        let next = LSB!(king_moves) as usize;
 
-            add_knight_motion(motion_list, current, next);
+        add_king_motion(motion_list, current, next);
 
-            king_moves ^= 1 << next;
-        }
+        king_moves ^= 1 << next;
+    }
 }
 
 pub fn gen_black_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
-    
+    let current = position.king_sq[Colour::BLACK as usize] as usize;
     let mut king_moves = KING_MOVES[current] & !position.colour_bb[Colour::BLACK as usize];
 
-        while king_moves != 0 {
-            let next = LSB!(king_moves) as usize;
+    while king_moves != 0 {
+        let next = LSB!(king_moves) as usize;
 
-            add_knight_motion(motion_list, current, next);
+        add_king_motion(motion_list, current, next);
 
-            king_moves ^= 1 << next;
-        }
+        king_moves ^= 1 << next;
+    }
+}
+
+// # COLLECTIVE # //
+
+pub fn gen_white_moves(motion_list: &mut Vec<Motion>, position: &Position){
+    
+    gen_white_pawn_moves(motion_list, position);
+    gen_white_knight_moves(motion_list, position);
+    gen_white_bishop_moves(motion_list, position);
+    gen_white_rook_moves(motion_list, position);
+    gen_white_queen_moves(motion_list, position);
+    gen_white_king_moves(motion_list, position);
+
+}
+
+pub fn gen_black_moves(motion_list: &mut Vec<Motion>, position: &Position){
+    
+    gen_black_pawn_moves(motion_list, position);
+    gen_black_knight_moves(motion_list, position);
+    gen_black_bishop_moves(motion_list, position);
+    gen_black_rook_moves(motion_list, position);
+    gen_black_queen_moves(motion_list, position);
+    gen_black_king_moves(motion_list, position);
+
+}
+
+// LEGAL MOVES //
+
+pub fn gen_legal_white_moves(position: &Position){
+    let mut motion_list: Vec<Motion> = vec![];
+    gen_white_moves(&mut motion_list, position);
 }
 
         
