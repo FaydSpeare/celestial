@@ -1,7 +1,9 @@
 use crate::types::*;
+use crate::motion::*;
 use bitintr::*;
 
 /* Const Arrays */
+
 
 pub const KING_MOVES: [u64; 64] = [0x302, 0x705, 0xe0a, 0x1c14, 0x3828, 0x7050, 0xe0a0, 0xc040,
                                    0x30203, 0x70507, 0xe0a0e, 0x1c141c, 0x382838, 0x705070, 0xe0a0e0, 0xc040c0,
@@ -94,7 +96,85 @@ pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
     (right ^ left) & ANTI_DIAG_MASK[(sq/8)+7-(sq%8)]
 }
 
-/* MOVE GENERTATION */
+/* MOTION LIST ADDERS */
 
+// PAWNS - Promotion Flag, EnPassnt Flag
+
+pub fn add_pawn_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
+        score: 0
+    })
+}
+
+pub fn add_pawn_promotion(motion_list: &mut Vec<Motion>, from: i32, to: i32, promotee: Promotee){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, promotee as u16, Flag::PROMOTION as u16),
+        score: 0
+    })
+}
+
+pub fn add_pawn_enpassant_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::ENPASSANT as u16),
+        score: 0
+    })
+}
+
+// KNIGHTS
+
+pub fn add_knight_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
+        score: 0
+    })
+}
+
+// BISHOP 
+
+pub fn add_bishop_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
+        score: 0
+    })
+}
+
+// ROOK 
+
+pub fn add_rook_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
+        score: 0
+    })
+}
+
+// QUEEN 
+
+pub fn add_queen_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
+        score: 0
+    })
+}
+
+// KING - Castling Flag
+
+pub fn add_king_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
+        score: 0
+    })
+}
+
+pub fn add_king_castling_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::CASTLING as u16),
+        score: 0
+    })
+}
+
+/* MOVE GENERATION */
+
+pub gen_white_pawn_moves(motion_list: )
 
 

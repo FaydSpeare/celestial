@@ -1,24 +1,28 @@
+pub struct MotionList {
+    pub motions: Vec<Motion>
+}
+
 pub struct Motion {
-    pub m: u16,
+    pub motion: u16,
     pub score: i32
 }
 
 impl Motion {
 
     pub fn from(&self) -> u16 {
-        self.m & 0x3F
+        self.motion & 0x3F
     }
 
     pub fn to(&self) -> u16 {
-        (self.m >> 6) & 0x3F
+        (self.motion >> 6) & 0x3F
     }
 
     pub fn flag(&self) -> u16 {
-        (self.m >> 14) & 0x3
+        (self.motion >> 14) & 0x3
     }
 
     pub fn promotee(&self) -> u16 {
-        (self.m >> 12) & 0x3
+        (self.motion >> 12) & 0x3
     }
 
     pub fn is_promotion(&self) -> bool {
@@ -38,19 +42,19 @@ impl Motion {
     }
 
     pub fn is_prom_queen(&self) -> bool {
-        self.promotee == Promotee::QUEEN as u16
+        self.promotee() == Promotee::QUEEN as u16
     }
 
     pub fn is_prom_rook(&self) -> bool {
-        self.promotee == Promotee::ROOK as u16
+        self.promotee() == Promotee::ROOK as u16
     }
 
     pub fn is_prom_bishop(&self) -> bool {
-        self.promotee == Promotee::BISHOP as u16
+        self.promotee() == Promotee::BISHOP as u16
     }
 
     pub fn is_prom_knight(&self) -> bool {
-        self.promotee == Promotee::KNIGHT as u16
+        self.promotee() == Promotee::KNIGHT as u16
     }
 
 }
@@ -58,9 +62,9 @@ impl Motion {
 /* Enum for Flags */
 
 pub enum Flag {
-    PROMOTION, ENPASSANT, CASTLING, NONE
+    NONE, PROMOTION, ENPASSANT, CASTLING
 }
 
 pub enum Promotee {
-    KNIGHT, BISHOP, ROOK, QUEEN
+    QUEEN, ROOK, BISHOP, KNIGHT
 }
