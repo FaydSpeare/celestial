@@ -1,5 +1,6 @@
 use crate::types::*;
 use crate::motion::*;
+use crate::position::*;
 use bitintr::*;
 
 /* Const Arrays */
@@ -100,81 +101,277 @@ pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
 
 // PAWNS - Promotion Flag, EnPassnt Flag
 
-pub fn add_pawn_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+pub fn add_pawn_motion(motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
         score: 0
-    })
+    });
 }
 
-pub fn add_pawn_promotion(motion_list: &mut Vec<Motion>, from: i32, to: i32, promotee: Promotee){
+pub fn add_pawn_promotion(motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
-        motion: MOVE_INT!(from as u16, to as u16, promotee as u16, Flag::PROMOTION as u16),
+        motion: MOVE_INT!(from as u16, to as u16, Promotee::QUEEN as u16, Flag::PROMOTION as u16),
         score: 0
-    })
+    });
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, Promotee::ROOK as u16, Flag::PROMOTION as u16),
+        score: 0
+    });
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, Promotee::BISHOP as u16, Flag::PROMOTION as u16),
+        score: 0
+    });
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, Promotee::KNIGHT as u16, Flag::PROMOTION as u16),
+        score: 0
+    });
 }
 
-pub fn add_pawn_enpassant_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+pub fn add_pawn_enpassant_motion(motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::ENPASSANT as u16),
         score: 0
-    })
+    });
 }
 
 // KNIGHTS
 
-pub fn add_knight_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+pub fn add_knight_motion(motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
         score: 0
-    })
+    });
 }
 
 // BISHOP 
 
-pub fn add_bishop_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+pub fn add_bishop_motion(motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
         score: 0
-    })
+    });
 }
 
 // ROOK 
 
-pub fn add_rook_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+pub fn add_rook_motion(motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
         score: 0
-    })
+    });
 }
 
 // QUEEN 
 
-pub fn add_queen_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+pub fn add_queen_motion(motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
         score: 0
-    })
+    });
 }
 
 // KING - Castling Flag
 
-pub fn add_king_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+pub fn add_king_motion(motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
         score: 0
-    })
+    });
 }
 
-pub fn add_king_castling_motion(motion_list: &mut Vec<Motion>, from: i32, to: i32){
+pub fn add_king_castling_motion(motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::CASTLING as u16),
         score: 0
-    })
+    });
 }
 
 /* MOVE GENERATION */
 
-pub gen_white_pawn_moves(motion_list: )
+//# PAWNS #//
+
+pub fn gen_white_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) {
+
+    let mut w_pawns = position.piece_bb[Piece::W_PAWN as usize].clone();
+
+    while w_pawns != 0 {
+        let current = LSB!(w_pawns) as usize;
+
+        if current / 8 == Rank::RANK_2 as usize {
+
+            // PAWN STARTS
+            if (SET_MASK[current+8] | SET_MASK[current+16]) & position.colour_bb[Colour::BOTH as usize] == 0 {
+                add_pawn_motion(motion_list, current, current + 16);
+            }
+        } 
+
+        // PAWN FORWARD
+        if SET_MASK[current+8] & position.colour_bb[Colour::BOTH as usize] == 0 {
+            
+            // CHECK PROMOTION
+            if current / 8 == 6 {
+                add_pawn_promotion(motion_list, current, current + 8);
+            } else {
+                add_pawn_motion(motion_list, current, current + 8);
+            }
+        }
+
+        // PAWN CAPTURE RIGHT
+        if current % 8 < 7 {
+            if SET_MASK[current+9] & position.colour_bb[Colour::BLACK as usize] != 0 {
+
+                // CHECK PROMOTION
+                if current / 8 == 6 {
+                    add_pawn_promotion(motion_list, current, current + 9);
+                } else {
+                    add_pawn_motion(motion_list, current, current + 9);
+                }
+                
+            }
+        }
+        
+        // PAWN CAPTURE LEFT
+        if current % 8 > 0 {
+            if SET_MASK[current+7] & position.colour_bb[Colour::BLACK as usize] != 0 {
+                
+                // CHECK PROMOTION
+                if current / 8 == 6 {
+                    add_pawn_promotion(motion_list, current, current + 7);
+                } else {
+                    add_pawn_motion(motion_list, current, current + 7);
+                }
+            }
+        }
+
+        // EP CAPTURE 
+        if position.ep != Square::NO_SQ as i32 {
+
+            if current + 9 == position.ep as usize {
+                add_pawn_enpassant_motion(motion_list, current, current + 9)
+            }
+
+            if current + 7 == position.ep as usize {
+                add_pawn_enpassant_motion(motion_list, current, current + 7)
+            }
+        }
+        
+
+        w_pawns ^= 1 << current;
+    }
+
+}
+
+pub fn gen_black_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) {
+
+    let mut b_pawns = position.piece_bb[Piece::B_PAWN as usize].clone();
+
+    while b_pawns != 0 {
+        let current = LSB!(b_pawns) as usize;
+
+        if current / 8 == Rank::RANK_7 as usize {
+
+            // PAWN STARTS
+            if (SET_MASK[current-8] | SET_MASK[current-16]) & position.colour_bb[Colour::BOTH as usize] == 0 {
+                add_pawn_motion(motion_list, current, current - 16);
+            }
+        } 
+
+        // PAWN FORWARD
+        if SET_MASK[current-8] & position.colour_bb[Colour::BOTH as usize] == 0 {
+            
+            // CHECK PROMOTION
+            if current / 8 == 1 {
+                add_pawn_promotion(motion_list, current, current - 8);
+            } else {
+                add_pawn_motion(motion_list, current, current - 8);
+            }
+        }
+
+        // PAWN CAPTURE RIGHT
+        if current % 8 < 7 {
+            if SET_MASK[current-7] & position.colour_bb[Colour::WHITE as usize] != 0 {
+
+                // CHECK PROMOTION
+                if current / 8 == 1 {
+                    add_pawn_promotion(motion_list, current, current - 7);
+                } else {
+                    add_pawn_motion(motion_list, current, current - 7);
+                }
+                
+            }
+        }
+        
+        // PAWN CAPTURE LEFT
+        if current % 8 > 0 {
+            if SET_MASK[current-9] & position.colour_bb[Colour::WHITE as usize] != 0 {
+                
+                // CHECK PROMOTION
+                if current / 8 == 1 {
+                    add_pawn_promotion(motion_list, current, current - 9);
+                } else {
+                    add_pawn_motion(motion_list, current, current - 9);
+                }
+            }
+        }
+
+        // EP CAPTURE 
+        if position.ep != Square::NO_SQ as i32 {
+
+            if current - 9 == position.ep as usize {
+                add_pawn_enpassant_motion(motion_list, current, current - 9)
+            }
+
+            if current - 7 == position.ep as usize {
+                add_pawn_enpassant_motion(motion_list, current, current - 7)
+            }
+        }
+        
+
+        b_pawns ^= 1 << current;
+    }
+
+}
+
+//# KNIGHTS #//
+
+pub fn gen_white_knight_moves(motion_list: &mut Vec<Motion>, position: &Position){
+    let mut w_knights = position.piece_bb[Piece::W_KNIGHT as usize].clone();
+
+    while w_knights != 0 {
+        let current = LSB!(w_knights) as usize;
+
+        let mut kn_moves = KN_MOVES[current] & !position.colour_bb[Colour::WHITE as usize];
+
+        while kn_moves != 0 {
+            let next = LSB!(kn_moves) as usize;
+
+            add_knight_motion(motion_list, current, next);
+
+            kn_moves ^= 1 << next;
+        }
+
+        w_knights ^= 1 << current;
+    }
+}
+
+pub fn gen_black_knight_moves(motion_list: &mut Vec<Motion>, position: &Position){
+    let mut b_knights = position.piece_bb[Piece::B_KNIGHT as usize].clone();
+
+    while b_knights != 0 {
+        let current = LSB!(b_knights) as usize;
+
+        let mut kn_moves = KN_MOVES[current] & !position.colour_bb[Colour::BLACK as usize];
+
+        while kn_moves != 0 {
+            let next = LSB!(kn_moves) as usize;
+
+            add_knight_motion(motion_list, current, next);
+
+            kn_moves ^= 1 << next;
+        }
+
+        b_knights ^= 1 << current;
+    }
+}
 
 

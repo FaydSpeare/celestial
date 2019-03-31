@@ -29,7 +29,7 @@ use attack::*;
 
 fn main() {
     init();
-    let mut p = parse_fen_string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq c6 0 1");
+    let mut p = parse_fen_string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     print(&p);
 
 
@@ -45,6 +45,15 @@ fn main() {
     };
 
     println!("{} {} {} {}", m.from(), m.to(), m.is_prom_queen(), m.is_enpassant());
+
+    let mut list = vec![];
+    //gen_black_pawn_moves(&mut list, &p);
+    gen_black_knight_moves(&mut list, &p);
+    println!("{}", list.len());
+
+    for m in list.iter() {
+        println!("{} {} {} {}", m.from(), m.to(), m.is_prom_queen(), m.is_enpassant());
+    }
 
 }
 
