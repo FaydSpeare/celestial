@@ -2,6 +2,7 @@
 
 /* EXTERNAL CRATES */
 extern crate rand;
+extern crate bitintr;
 
 #[macro_use]
 mod macros;
@@ -28,7 +29,7 @@ use attack::*;
 
 fn main() {
     init();
-    let mut p = parse_fen_string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq c6 0 1");
+    let mut p = parse_fen_string("rnbqkbnr/pppppppp/8/6p1/8/8/PPPPPPPP/RNBQKBNR w KQkq c6 0 1");
     print(&p);
 
     let m = Motion {
@@ -36,6 +37,12 @@ fn main() {
         score: 0
     };
 
-    println!("{}", is_attacked_by(&p, 32, false));
+    println!("{}", is_attacked_by_knight(&p, 16, true));
 
+    print_bb(&KN_MOVES[16]);
+
+    print_bb(&sliding_attacks( 38, p.colour_bb[2]));
+
+    
 }
+

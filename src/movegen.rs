@@ -1,4 +1,5 @@
-
+use crate::types::*;
+use bitintr::*;
 
 /* Const Arrays */
 
@@ -28,3 +29,57 @@ pub const B_PAWN_CAP: [u64; 64] = [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                                    0x200000000, 0x500000000, 0xa00000000, 0x1400000000, 0x2800000000, 0x5000000000, 0xa000000000, 0x4000000000,
                                    0x20000000000, 0x50000000000, 0xa0000000000, 0x140000000000, 0x280000000000, 0x500000000000, 0xa00000000000, 0x400000000000, 
                                    0x2000000000000, 0x5000000000000, 0xa000000000000, 0x14000000000000, 0x28000000000000, 0x50000000000000, 0xa0000000000000, 0x40000000000000];
+
+pub const FILE_MASK: [u64; 8] = [0x101010101010101, 0x202020202020202, 0x404040404040404, 0x808080808080808,
+                                 0x1010101010101010, 0x2020202020202020, 0x4040404040404040, 0x8080808080808080];
+
+pub const RANK_MASK: [u64; 8] = [0xFF, 0xFF00, 0xFF0000, 0xFF000000, 0xFF00000000, 0xFF0000000000, 0xFF000000000000, 0xFF00000000000000];
+
+pub const DIAG_MASK: [u64; 15] = [0x1, 0x102, 0x10204, 0x1020408, 0x102040810, 0x10204081020, 0x1020408102040,
+                    0x102040810204080, 0x204081020408000, 0x408102040800000, 0x810204080000000,
+                    0x1020408000000000, 0x2040800000000000, 0x4080000000000000, 0x8000000000000000];
+
+pub const ANTI_DIAG_MASK: [u64; 15] = [0x80, 0x8040, 0x804020, 0x80402010, 0x8040201008, 0x804020100804, 0x80402010080402,
+                    0x8040201008040201, 0x4020100804020100, 0x2010080402010000, 0x1008040201000000,
+                    0x804020100000000, 0x402010000000000, 0x201000000000000, 0x100000000000000];
+
+pub fn sliding_attacks(sq: usize, occ: u64) -> u64 {
+    flat_sliding_attacks(sq, occ) | diag_sliding_attacks(sq, occ)
+}
+
+pub fn flat_sliding_attacks(sq: usize, occ: u64) -> u64 {
+    horizontal_sliding_attacks(sq, occ) | vertical_sliding_attacks(sq, occ)
+}
+
+pub fn horizontal_sliding_attacks(sq: usize, occ: u64) -> u64 {
+    let foc: u64 = (occ | FILE_MASK[0] | FILE_MASK[7]) & RANK_MASK[sq/8];
+    let right: u64 = (foc - 2*SET_MASK[sq]);
+    let left: u64 = (foc.rbit() - 2*SET_MASK[sq].rbit()).rbit();
+    (right ^ left) & RANK_MASK[sq/8]
+}
+
+pub fn vertical_sliding_attacks(sq: usize, occ: u64) -> u64 {
+    let foc: u64 = (occ | RANK_MASK[0] | RANK_MASK[7]) & FILE_MASK[sq%8];
+    let right: u64 = (foc - 2*SET_MASK[sq]);
+    let left: u64 = (foc.rbit() - 2*SET_MASK[sq].rbit()).rbit();
+    (right ^ left) & FILE_MASK[sq%8]
+}
+
+pub fn diag_sliding_attacks(sq: usize, occ: u64) -> u64 {
+    diagonal_sliding_attacks(sq, occ) | anti_diagonal_sliding_attacks(sq, occ)
+}
+
+pub fn diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
+    let foc: u64 = (occ | RANK_MASK[0] | RANK_MASK[7] | FILE_MASK[0] | FILE_MASK[7]) & DIAG_MASK[(sq/8)+(sq%8)];
+    let right: u64 = (foc - 2*SET_MASK[sq]);
+    let left: u64 = (foc.rbit() - 2*SET_MASK[sq].rbit()).rbit();
+    (right ^ left) & DIAG_MASK[(sq/8)+(sq%8)]
+}
+
+pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
+    let foc: u64 = (occ | RANK_MASK[0] | RANK_MASK[7] | FILE_MASK[0] | FILE_MASK[7]) & ANTI_DIAG_MASK[(sq/8)+7-(sq%8)];
+    let right: u64 = (foc - 2*SET_MASK[sq]);
+    let left: u64 = (foc.rbit() - 2*SET_MASK[sq].rbit()).rbit();
+    (right ^ left) & ANTI_DIAG_MASK[(sq/8)+7-(sq%8)]
+}
+
