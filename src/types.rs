@@ -11,7 +11,6 @@ pub type Key = u64;
 /* Useful Constants */
 
 pub const MAX_GAME_MOVES: usize = 2048;
-
 pub const BOARD_NUM: usize = 64;
 pub const PIECE_NUM: usize = 6;
 pub const COLOUR_NUM: usize = 2;
