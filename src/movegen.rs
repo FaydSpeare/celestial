@@ -1,6 +1,7 @@
 use crate::types::*;
 use crate::motion::*;
 use crate::position::*;
+use crate::attack::*;
 use bitintr::*;
 
 /* Const Arrays */
@@ -239,12 +240,19 @@ pub fn gen_white_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
         // EP CAPTURE 
         if position.ep != Square::NO_SQ as i32 {
 
-            if current + 9 == position.ep as usize {
-                add_pawn_enpassant_motion(motion_list, current, current + 9)
+            //println!("ep{}",position.ep);
+            if current % 8 < 7 {
+                if current + 9 == position.ep as usize {
+                    //println!("eps1");
+                    add_pawn_enpassant_motion(motion_list, current, current + 9)
+                }
             }
-
-            if current + 7 == position.ep as usize {
-                add_pawn_enpassant_motion(motion_list, current, current + 7)
+            
+            if current % 8 > 0 {
+                if current + 7 == position.ep as usize {
+                    //println!("eps2");
+                    add_pawn_enpassant_motion(motion_list, current, current + 7)
+                }
             }
         }
     }
@@ -305,13 +313,20 @@ pub fn gen_black_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
         // EP CAPTURE 
         if position.ep != Square::NO_SQ as i32 {
 
-            if current - 9 == position.ep as usize {
-                add_pawn_enpassant_motion(motion_list, current, current - 9)
+            if current % 8 > 0 {
+                if current - 9 == position.ep as usize {
+                    //println!("eps");
+                    add_pawn_enpassant_motion(motion_list, current, current - 9)
+                }
             }
-
-            if current - 7 == position.ep as usize {
-                add_pawn_enpassant_motion(motion_list, current, current - 7)
+            
+            if current % 8 < 7 {
+                if current - 7 == position.ep as usize {
+                   // println!("eps");
+                    add_pawn_enpassant_motion(motion_list, current, current - 7)
+                }
             }
+            
         }
     }
 
@@ -473,6 +488,22 @@ pub fn gen_white_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
 
         king_moves ^= 1 << next;
     }
+
+    if position.castling_rights & Castling::W_OO as u8 == Castling::W_OO as u8 {
+        if position.board[5] == Piece::EMPTY as i32 && position.board[6] == Piece::EMPTY as i32 {
+            if !is_attacked_by(position, 4, false) && !is_attacked_by(position, 5, false) {
+                add_king_castling_motion(motion_list, 4, 6);
+            }
+        }
+    }
+
+    if position.castling_rights & Castling::W_OOO as u8 == Castling::W_OOO as u8 {
+        if position.board[3] == Piece::EMPTY as i32 && position.board[2] == Piece::EMPTY as i32 {
+            if !is_attacked_by(position, 4, false) && !is_attacked_by(position, 3, false) {
+                add_king_castling_motion(motion_list, 4, 2);
+            }
+        }
+    }
 }
 
 pub fn gen_black_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
@@ -486,18 +517,42 @@ pub fn gen_black_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
 
         king_moves ^= 1 << next;
     }
+
+    if position.castling_rights & Castling::B_OO as u8 == Castling::B_OO as u8 {
+        if position.board[61] == Piece::EMPTY as i32 && position.board[62] == Piece::EMPTY as i32 {
+            if !is_attacked_by(position, 60, true) && !is_attacked_by(position, 61, true) {
+                add_king_castling_motion(motion_list, 60, 62);
+            }
+        }
+    }
+
+    if position.castling_rights & Castling::B_OOO as u8 == Castling::B_OOO as u8 {
+        if position.board[59] == Piece::EMPTY as i32 && position.board[58] == Piece::EMPTY as i32 {
+            if !is_attacked_by(position, 60, true) && !is_attacked_by(position, 59, true) {
+                add_king_castling_motion(motion_list, 60, 58);
+            }
+        }
+    }
 }
+
+
 
 // # COLLECTIVE # //
 
 pub fn gen_white_moves(motion_list: &mut Vec<Motion>, position: &Position){
-    
+    //println!("pawn");
     gen_white_pawn_moves(motion_list, position);
+    //println!("knight");
     gen_white_knight_moves(motion_list, position);
+    //println!("bishop");
     gen_white_bishop_moves(motion_list, position);
+    //println!("rook");
     gen_white_rook_moves(motion_list, position);
+    //println!("queen");
     gen_white_queen_moves(motion_list, position);
+    //println!("king");
     gen_white_king_moves(motion_list, position);
+    //println!("done");
 
 }
 
@@ -515,6 +570,7 @@ pub fn gen_black_moves(motion_list: &mut Vec<Motion>, position: &Position){
 // LEGAL MOVES //
 
 pub fn gen_legal_white_moves(position: &Position){
+
     let mut motion_list: Vec<Motion> = vec![];
     gen_white_moves(&mut motion_list, position);
 }

@@ -166,7 +166,7 @@ pub fn update_attributes(p: &mut Position){
 
             p.material[colour as usize] += PIECE_VALUE[piece as usize];
             
-            p.piece_list[piece as usize][p.piece_num[piece as usize] as usize] = i as i32;
+            p.piece_list[piece as usize].push(i as i32);
             p.piece_num[piece as usize] += 1;
 
             if piece == Piece::W_KING as i32 {
@@ -176,6 +176,8 @@ pub fn update_attributes(p: &mut Position){
             }
         }
     }
+
+    println!("pawn nums = {}", p.piece_list[6].len());
 
     for i in 0..6 {
         p.colour_bb[Colour::WHITE as usize] |= p.piece_bb[i as usize];

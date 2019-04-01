@@ -1,5 +1,6 @@
 use crate::types::*;
 use crate::bitboard::*;
+use crate::motion::*;
 
 pub struct Position {
 
@@ -34,17 +35,71 @@ pub struct Position {
     pub history: Vec<UndoEntry>,
 
     // Piece List
-    pub piece_list: [[i32; 10]; 12]
+    pub piece_list: [Vec<i32>; 12]
 }
 
 pub struct UndoEntry {
 
     // Information to roll back
-    pub motion: i32,
+    pub motion: u16,
     pub castling_rights: u8,
     pub ep: i32,
     pub fifty: i32,
-    pub pos_key: Key
+    pub pos_key: Key,
+    pub capture: usize
+
+}
+
+impl UndoEntry {
+
+    pub fn from(&self) -> u16 {
+        self.motion & 0x3F
+    }
+
+    pub fn to(&self) -> u16 {
+        (self.motion >> 6) & 0x3F
+    }
+
+    pub fn flag(&self) -> u16 {
+        (self.motion >> 14) & 0x3
+    }
+
+    pub fn promotee(&self) -> u16 {
+        (self.motion >> 12) & 0x3
+    }
+
+    pub fn is_promotion(&self) -> bool {
+        self.flag() == Flag::PROMOTION as u16
+    }
+
+    pub fn is_enpassant(&self) -> bool {
+        self.flag() == Flag::ENPASSANT as u16
+    }
+
+    pub fn is_castling(&self) -> bool {
+        self.flag() == Flag::CASTLING as u16
+    }
+
+    pub fn is_none(&self) -> bool {
+        self.flag() == Flag::NONE as u16
+    }
+
+    pub fn is_prom_queen(&self) -> bool {
+        self.promotee() == Promotee::QUEEN as u16
+    }
+
+    pub fn is_prom_rook(&self) -> bool {
+        self.promotee() == Promotee::ROOK as u16
+    }
+
+    pub fn is_prom_bishop(&self) -> bool {
+        self.promotee() == Promotee::BISHOP as u16
+    }
+
+    pub fn is_prom_knight(&self) -> bool {
+        self.promotee() == Promotee::KNIGHT as u16
+    }
+
 }
 
 impl Position {
@@ -79,7 +134,7 @@ impl Position {
 
             history: vec![],
 
-            piece_list: [[0; 10]; 12]
+            piece_list: [vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![]]
         }
     }
 
@@ -89,17 +144,21 @@ impl Position {
             self.board[i] = Piece::EMPTY as i32;
         }
 
-        for i in 0..3 {
+        for i in 0..2 {
             self.big_piece[i] = 0;
             self.maj_piece[i] = 0;
             self.min_piece[i] = 0;
+        }
 
+        for i in 0..3 {
             self.colour_bb[i] = 0u64;
         }
 
         for i in 0..12 {
             self.piece_bb[i] = 0u64;
             self.piece_num[i] = 0;
+
+            self.piece_list[i] = vec![];
         }
 
         self.king_sq[Colour::WHITE as usize] = Square::NO_SQ as i32;
@@ -115,6 +174,9 @@ impl Position {
         self.castling_rights = 0;
         self.pos_key = 0u64;
     }
+
+    
+
 }
 
 impl UndoEntry {

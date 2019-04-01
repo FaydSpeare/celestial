@@ -35,14 +35,15 @@ pub enum File {
 }
 
 pub enum Square {
-    A1, A2, A3, A4, A5, A6, A7, A8,
-    B1, B2, B3, B4, B5, B6, B7, B8,
-    C1, C2, C3, C4, C5, C6, C7, C8,
-    D1, D2, D3, D4, D5, D6, D7, D8, 
-    E1, E2, E3, E4, E5, E6, E7, E8,
-    F1, F2, F3, F4, F5, F6, F7, F8,
-    G1, G2, G3, G4, G5, G6, G7, G8,
-    H1, H2, H3, H4, H5, H6, H7, H8, NO_SQ = -1
+    A1, B1, C1, D1, E1, F1, G1, H1,
+    A2, B2, C2, D2, E2, F2, G2, H2,
+    A3, B3, C3, D3, E3, F3, G3, H3,
+    A4, B4, C4, D4, E4, F4, G4, H4,
+    A5, B5, C5, D5, E5, F5, G5, H5,
+    A6, B6, C6, D6, E6, F6, G6, H6,
+    A7, B7, C7, D7, E7, F7, G7, H7,
+    A8, B8, C8, D8, E8, F8, G8, H8,
+    NO_SQ = -1
 }
 
 pub enum Castling {
@@ -50,6 +51,15 @@ pub enum Castling {
 }
 
 /* Useful Arrays */
+
+pub const CASTLE_PERM: [u8; 64] = [13, 15, 15, 15, 12, 15, 15, 14, 
+                                    15, 15, 15, 15, 15, 15, 15, 15,
+                                    15, 15, 15, 15, 15, 15, 15, 15,
+                                    15, 15, 15, 15, 15, 15, 15, 15,
+                                    15, 15, 15, 15, 15, 15, 15, 15,
+                                    15, 15, 15, 15, 15, 15, 15, 15,
+                                    15, 15, 15, 15, 15, 15, 15, 15,
+                                     7, 15, 15, 15,  3, 15, 15, 11];
 
 pub const SET_MASK: [u64; 64] = [0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000,
@@ -74,6 +84,9 @@ pub const PIECE_MAJOR: [bool; 13] = [false, false, false, true, true, true, fals
 pub const PIECE_MINOR: [bool; 13] = [false, true, true, false, false, false, false, true, true, false, false, false, false];
 pub const PIECE_COLOUR: [i32; 13] = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2];
 pub const PIECE_VALUE: [i32; 13] = [100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000, 0];
+
+pub const PIECE_PAWN: [bool; 13] = [true, false, false, false, false, false, true, false, false, false, false, false, false];
+pub const PIECE_KING: [bool; 13] = [false, false, false, false, false, true, false, false, false, false, false, true, false];
 
 pub static mut PIECE_KEYS: [[u64; 64]; 13] = [[0u64; 64]; 13];
 pub static mut COLOUR_KEY: u64 = 0u64;

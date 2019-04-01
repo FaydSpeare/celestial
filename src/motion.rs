@@ -33,7 +33,7 @@ impl Motion {
         self.flag() == Flag::ENPASSANT as u16
     }
 
-    pub fn is_caslting(&self) -> bool {
+    pub fn is_castling(&self) -> bool {
         self.flag() == Flag::CASTLING as u16
     }
 

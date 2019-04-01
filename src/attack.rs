@@ -5,26 +5,32 @@ use crate::position::*;
 pub fn is_attacked_by(p: &Position, sq: usize, attacker: bool) -> bool {
 
     if is_attacked_by_pawn(p, sq, attacker) {
+        //println!("1");
         return true;
     }
 
     if is_attacked_by_knight(p, sq, attacker) {
+        //println!("2");
         return true;
     }
 
     if is_attacked_by_bishop(p, sq, attacker) {
+        //println!("3");
         return true;
     }
 
     if is_attacked_by_rook(p, sq, attacker) {
+        //println!("4");
         return true;
     }
 
     if is_attacked_by_queen(p, sq, attacker) {
+        //println!("5");
         return true;
     }
 
     if is_attacked_by_king(p, sq, attacker) {
+        //println!("6");
         return true;
     }
 
@@ -119,11 +125,11 @@ pub fn is_attacked_by_king(p: &Position, sq: usize, attacker: bool) -> bool {
     let king_attacks = KING_MOVES[sq];
 
     if attacker {
-        if king_attacks & p.piece_bb[Piece::W_KNIGHT as usize] != 0 {
+        if king_attacks & p.piece_bb[Piece::W_KING as usize] != 0 {
             return true;
         }
     } else {
-        if king_attacks & p.piece_bb[Piece::B_KNIGHT as usize] != 0 {
+        if king_attacks & p.piece_bb[Piece::B_KING as usize] != 0 {
             return true;
         }
     }
