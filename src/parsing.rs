@@ -174,6 +174,7 @@ pub fn update_attributes(p: &mut Position){
             } else if piece == Piece::B_KING as i32 {
                 p.king_sq[Colour::BLACK as usize] = i as i32;
             }
+
         }
     }
 

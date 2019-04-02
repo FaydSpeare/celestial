@@ -498,7 +498,7 @@ pub fn gen_white_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
     }
 
     if position.castling_rights & Castling::W_OOO as u8 == Castling::W_OOO as u8 {
-        if position.board[3] == Piece::EMPTY as i32 && position.board[2] == Piece::EMPTY as i32 {
+        if position.board[3] == Piece::EMPTY as i32 && position.board[2] == Piece::EMPTY as i32 && position.board[1] == Piece::EMPTY as i32 {
             if !is_attacked_by(position, 4, false) && !is_attacked_by(position, 3, false) {
                 add_king_castling_motion(motion_list, 4, 2);
             }
@@ -527,7 +527,7 @@ pub fn gen_black_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
     }
 
     if position.castling_rights & Castling::B_OOO as u8 == Castling::B_OOO as u8 {
-        if position.board[59] == Piece::EMPTY as i32 && position.board[58] == Piece::EMPTY as i32 {
+        if position.board[59] == Piece::EMPTY as i32 && position.board[58] == Piece::EMPTY as i32 && position.board[57] == Piece::EMPTY as i32 {
             if !is_attacked_by(position, 60, true) && !is_attacked_by(position, 59, true) {
                 add_king_castling_motion(motion_list, 60, 58);
             }

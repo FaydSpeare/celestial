@@ -22,6 +22,8 @@ impl Position {
         self.piece_num[piece] += 1;
 
         self.board[square] = piece as i32;
+
+        self.material[PIECE_COLOUR[piece] as usize] += PIECE_VALUE[piece];
     }
 
     pub fn move_piece(&mut self, from: usize, to: usize) {
@@ -35,6 +37,8 @@ impl Position {
 
         //println!("from: {}, to: {}", from, to);
         //print(&self);
+
+
         for i in 0..(self.piece_list[piece].len()) {
             if self.piece_list[piece][i] == (from as i32) {
                 self.piece_list[piece][i] = (to as i32);
@@ -79,10 +83,13 @@ impl Position {
 
         self.board[square] = Piece::EMPTY as i32;
 
+        self.material[PIECE_COLOUR[piece] as usize] -= PIECE_VALUE[piece];
+
     }
 
     pub fn do_motion(&mut self, motion: &Motion) -> bool {
 
+        //println!("BEFORE");
         //print(&self);
 
         let from = motion.from() as usize;
@@ -193,7 +200,35 @@ impl Position {
 
         if motion.is_promotion(){
             self.clear_piece(to);
-            self.add_piece(motion.promotee() as usize, to);
+
+            if self.side_to_move {
+                if motion.is_prom_queen(){
+                    self.add_piece(Piece::W_QUEEN as usize, to);
+                }
+                else if motion.is_prom_rook(){
+                    self.add_piece(Piece::W_ROOK as usize, to);
+                }
+                else if motion.is_prom_bishop(){
+                    self.add_piece(Piece::W_BISHOP as usize, to);
+                }
+                else if motion.is_prom_knight(){
+                    self.add_piece(Piece::W_KNIGHT as usize, to);
+                }
+            } else {
+                if motion.is_prom_queen(){
+                    self.add_piece(Piece::B_QUEEN as usize, to);
+                }
+                else if motion.is_prom_rook(){
+                    self.add_piece(Piece::B_ROOK as usize, to);
+                }
+                else if motion.is_prom_bishop(){
+                    self.add_piece(Piece::B_BISHOP as usize, to);
+                }
+                else if motion.is_prom_knight(){
+                    self.add_piece(Piece::B_KNIGHT as usize, to);
+                }
+            }
+            
         }
 
         if PIECE_KING[piece] {
@@ -227,9 +262,17 @@ impl Position {
 
     pub fn undo_motion(&mut self){
 
-        self.ply -= 1;
+       
 
-        let undo_motion = self.history.pop().unwrap();
+        let undo_motion = match self.history.pop() {
+            Some(t) => t,
+            _ => {
+                //print(&self);
+                panic!();
+            }
+        };
+
+        self.ply -= 1;
 
         let from = undo_motion.from() as usize;
         let to = undo_motion.to() as usize;
@@ -299,16 +342,20 @@ impl Position {
         }
 
         if undo_motion.is_promotion(){
+            //println!("toooo : {}", to);
             self.clear_piece(from);
             if PIECE_COLOUR[piece] == Colour::WHITE as i32 {
-                self.add_piece(Piece::W_PAWN as usize, to);
+                self.add_piece(Piece::W_PAWN as usize, from);
             } else {
-                self.add_piece(Piece::B_PAWN as usize, to);
+                self.add_piece(Piece::B_PAWN as usize, from);
             }
             
         }
 
         self.colour_bb[2] = self.colour_bb[0] | self.colour_bb[1];
+
+        //println!("AFTER");
+        //print(&self);
 
     }
     
