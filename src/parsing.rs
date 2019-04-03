@@ -178,7 +178,6 @@ pub fn update_attributes(p: &mut Position){
         }
     }
 
-    println!("pawn nums = {}", p.piece_list[6].len());
 
     for i in 0..6 {
         p.colour_bb[Colour::WHITE as usize] |= p.piece_bb[i as usize];

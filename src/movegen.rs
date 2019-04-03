@@ -58,26 +58,50 @@ pub const ANTI_DIAG_MASK: [u64; 15] = [0x80, 0x8040, 0x804020, 0x80402010, 0x804
 
 /* SLIDING ATTACKS */
 
+#[inline]
 pub fn sliding_attacks(sq: usize, occ: u64) -> u64 {
     flat_sliding_attacks(sq, occ) | diag_sliding_attacks(sq, occ)
 }
 
+#[inline]
 pub fn flat_sliding_attacks(sq: usize, occ: u64) -> u64 {
     horizontal_sliding_attacks(sq, occ) | vertical_sliding_attacks(sq, occ)
 }
 
+#[inline]
 pub fn horizontal_sliding_attacks(sq: usize, occ: u64) -> u64 {
     ((occ.wrapping_sub(SET_MASK[sq].wrapping_mul(2))) ^ (occ.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit()) & RANK_MASK[sq/8]
 }
 
+#[inline]
 pub fn vertical_sliding_attacks(sq: usize, occ: u64) -> u64 {
     let occ = occ & FILE_MASK[sq%8];
     ((occ.wrapping_sub(SET_MASK[sq].wrapping_mul(2))) ^ (occ.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit()) & FILE_MASK[sq%8]
 }
 
+#[inline]
 pub fn diag_sliding_attacks(sq: usize, occ: u64) -> u64 {
     diagonal_sliding_attacks(sq, occ) | anti_diagonal_sliding_attacks(sq, occ)
 }
+
+#[inline]
+pub fn diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
+    let index = (sq/8)+(sq%8);
+    let foc: u64 = occ & DIAG_MASK[index];
+    ((foc.wrapping_sub(SET_MASK[sq].wrapping_mul(2))) ^ (foc.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit()) & DIAG_MASK[index]
+}
+
+#[inline]
+pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
+    let index = (sq/8)+7-(sq%8);
+    let foc: u64 = occ & ANTI_DIAG_MASK[index];
+    ((foc.wrapping_sub(SET_MASK[sq].wrapping_mul(2))) ^ (foc.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit()) & ANTI_DIAG_MASK[index]
+}
+
+
+/*
+WORKING FINE
+
 
 pub fn diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
     let foc: u64 = (occ | RANK_MASK[0] | FILE_MASK[7] | RANK_MASK[7] | FILE_MASK[0]) & DIAG_MASK[(sq/8)+(sq%8)];
@@ -92,6 +116,9 @@ pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
     let left: u64 = (foc.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit();
     (right ^ left) & ANTI_DIAG_MASK[(sq/8)+7-(sq%8)]
 }
+*/
+
+
 
 /* MOTION LIST ADDERS */
 
@@ -567,12 +594,34 @@ pub fn gen_black_moves(motion_list: &mut Vec<Motion>, position: &Position){
 
 }
 
-// LEGAL MOVES //
+pub fn gen_moves(motion_list: &mut Vec<Motion>, position: &Position){
 
-pub fn gen_legal_white_moves(position: &Position){
+    if position.side_to_move {
+        gen_white_moves(motion_list, position);
+    } else {
+        gen_black_moves(motion_list, position);
+    }
 
-    let mut motion_list: Vec<Motion> = vec![];
-    gen_white_moves(&mut motion_list, position);
+}
+
+pub fn gen_legal_moves(motion_list: &mut Vec<Motion>, position: &mut Position){
+
+    let mut pseudos: Vec<Motion> = vec![];
+
+    if position.side_to_move {
+        gen_white_moves(&mut pseudos, position);
+    
+    } else {
+        gen_black_moves(&mut pseudos, position);
+    }
+
+    for i in pseudos {
+        if position.do_motion(&i) {
+            position.undo_motion();
+            motion_list.push(i);
+        }
+    }
+
 }
 
         

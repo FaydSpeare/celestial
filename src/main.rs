@@ -19,6 +19,7 @@ mod attack;
 mod domotion;
 mod io;
 mod mcts;
+mod uci;
 
 /* SCOPE */
 use types::*;
@@ -32,18 +33,24 @@ use attack::*;
 use domotion::*;
 use io::*;
 use mcts::*;
+use uci::*;
 
 use rand::Rng;
+use std::time::{Duration, Instant};
 //use std::io;
 
 use types::Square::*;
 
 fn main() {
+
+    uci_loop();
+    /*
     println!("hello");
     init();
     let mut p = parse_fen_string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     //let mut p = parse_fen_string("R6r/8/8/2K5/5k2/8/8/r6R w - - 0 1");
     print(&p);
+    */
     
     /*
     let m = Motion {
@@ -92,7 +99,7 @@ fn main() {
     println!("average: {}", av/1);
     */
     
-    
+    /*
     
     for k in 0..3000 {
         
@@ -160,17 +167,23 @@ fn main() {
         print(&p);
 
     }
+    */
+    /*
+
+    let start = Instant::now();
+    divide(5, &mut p);
+    let duration = start.elapsed();
+    println!("Time elapsed in expensive_function() is: {:?}ms", duration.as_millis());
     
 
-    
     
     
     
     //play_game(&mut p);
     
-    //divide(6, &mut p);
+   
 
-
+    */
 
 }
 
@@ -212,7 +225,7 @@ fn divide(depth: i32, pos: &mut Position){
     } else {
         gen_black_moves(&mut list, pos);
     }
-    println!("moves: {}", list.len());
+    //println!("moves: {}", list.len());
 
     let mut ell = 0;
 
@@ -223,13 +236,13 @@ fn divide(depth: i32, pos: &mut Position){
         if !pos.do_motion(&m) {
             continue;
         }
-        println!();
-        println!();
+        //println!();
+        //println!();
         perft(depth-1, pos, &mut l);
 
         pos.undo_motion();
-        print_move(&m);
-        println!(" {}", l);
+        //print_move(&m);
+        //println!(" {}", l);
         ell += l;
     }
 
