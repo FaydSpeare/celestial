@@ -42,11 +42,12 @@ use std::time::{Duration, Instant};
 use types::Square::*;
 
 fn main() {
+    init();
 
     uci_loop();
     /*
     println!("hello");
-    init();
+    
     let mut p = parse_fen_string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     //let mut p = parse_fen_string("R6r/8/8/2K5/5k2/8/8/r6R w - - 0 1");
     print(&p);
