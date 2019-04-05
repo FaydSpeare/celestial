@@ -20,6 +20,7 @@ mod domotion;
 mod io;
 mod mcts;
 mod uci;
+mod search;
 
 /* SCOPE */
 use types::*;
@@ -34,6 +35,7 @@ use domotion::*;
 use io::*;
 use mcts::*;
 use uci::*;
+use search::*;
 
 use rand::Rng;
 use std::time::{Duration, Instant};

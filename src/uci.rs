@@ -5,6 +5,7 @@ use crate::motion::*;
 use crate::types::*;
 use crate::io::*;
 use crate::attack::*;
+use crate::search::*;
 
 use std::io;
 use rand::Rng;
@@ -107,7 +108,7 @@ pub fn parse_go(pos: &mut Position) {
     gen_legal_moves(&mut list, pos);
 
     let m = &list[rng.gen_range(0, list.len())];
-    */
+    
 
     let mut k = 0;
 
@@ -125,7 +126,9 @@ pub fn parse_go(pos: &mut Position) {
     print_move(m);
     println!();
     
-    pos.do_motion(m);
+    pos.do_motion(m)*/
+
+    iterative_deepening(3000 ,pos);
 
 }
 
@@ -199,140 +202,3 @@ pub fn parse_move(pos: &Position, m: &str) -> Motion {
  
 }
 
-pub fn minimax_top(list: &mut Vec<Motion>, depth: i32, pos: &mut Position, k: &mut i32) -> usize {
-    gen_legal_moves(list, pos);
-
-    if pos.side_to_move {
-
-        let mut best_index = 0;
-        let mut best_score = -99999;
-
-        for i in 0..(list.len()) {
-
-            pos.do_motion(&list[i]);
-
-            let score = minimax(depth-1, pos, false, k);
-            if score > best_score {
-                best_score = score;
-                best_index = i;
-            }
-
-            pos.undo_motion();
-        }
-        println!("best score: {}", best_score);
-        return best_index;
-
-    } else {
-
-        let mut best_index = 0;
-        let mut best_score = 99999;
-
-        for i in 0..(list.len()) {
-
-            pos.do_motion(&list[i]);
-
-            let score = minimax(depth-1, pos, true, k);
-            if score < best_score {
-                best_score = score;
-                best_index = i;
-            }
-
-            pos.undo_motion();
-        }
-        println!("best score: {}", best_score);
-        return best_index;
-        
-
-    }
-
-    
-
-    
-
-}
-
-pub fn minimax(depth: i32, pos: &mut Position, player: bool, k: &mut i32) -> i32 {
-
-    if check_3_fold(pos){
-        return 0;
-    }
-
-    if depth == 0 {
-        *k += 1;
-        return eval(pos);
-    }
-
-    let mut list: Vec<Motion> = vec![];
-    gen_legal_moves(&mut list, pos);
-
-    if player {
-
-        let mut best = -999999;
-        for m in list.iter() {
-            pos.do_motion(&m);
-            let score = minimax(depth-1, pos, !player, k);
-            if score > best {
-                best = score;
-            }
-            pos.undo_motion();
-        }
-        return best;
-
-    } else {
-
-        let mut best = 999999;
-        for m in list.iter() {
-            pos.do_motion(&m);
-            let score = minimax(depth-1, pos, !player, k);
-            if score < best {
-                best = score;
-            }
-            pos.undo_motion();
-        }
-        return best;
-
-    }
-
-}
-
-pub fn eval(pos: &Position) -> i32 {
-    let mut eval = 0;
-
-    eval += pos.material[0];
-
-    eval -= pos.material[1];
-
-    if pos.side_to_move {
-        if is_attacked_by(pos, pos.king_sq[1] as usize, true) {
-            eval += 1000000;
-        }
-
-    } else {
-        if is_attacked_by(pos, pos.king_sq[0] as usize, false) {
-            eval -= 1000000;
-        }
-    }
-
-
-
-    
-    //println!("{}", eval);
-    eval
-}
-
-pub fn check_3_fold(pos: &Position) -> bool {
-    let key = pos.pos_key;
-    let mut count = 0;
-
-    for i in pos.history.iter() {
-        if key == i.pos_key {
-            count += 1;
-        }
-    }
-
-    if count > 1 {
-        return true;
-    }
-
-    false
-}

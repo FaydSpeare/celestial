@@ -9,6 +9,13 @@ pub struct Motion {
 
 impl Motion {
 
+    pub fn new() -> Motion {
+        Motion {
+            motion: MOVE_INT!(0, 0, 0, Flag::NONE as u16),
+            score: 0
+        }
+    }
+
     pub fn from(&self) -> u16 {
         self.motion & 0x3F
     }
