@@ -1,6 +1,7 @@
 use crate::types::*;
 use crate::bitboard::*;
 use crate::motion::*;
+use std::collections::HashMap;
 
 pub struct Position {
 
@@ -35,7 +36,17 @@ pub struct Position {
     pub history: Vec<UndoEntry>,
 
     // Piece List
-    pub piece_list: [Vec<i32>; 12]
+    pub piece_list: [Vec<i32>; 12],
+
+    // PV Table
+    pub pv_table: HashMap<Key, Motion>,
+    pub pv_array: Vec<i32>,
+
+    // Search Arrays
+    pub search_history: [[i32; 64]; 13],
+    pub search_killers: [[i32; 100]; 2]
+
+
 }
 
 pub struct UndoEntry {
@@ -134,7 +145,14 @@ impl Position {
 
             history: vec![],
 
-            piece_list: [vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![]]
+            piece_list: [vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![]],
+
+            pv_table: HashMap::new(),
+            pv_array:vec![],
+
+            // Search Arrays
+            search_history: [[0; 64]; 13],
+            search_killers: [[0; 100]; 2]
         }
     }
 

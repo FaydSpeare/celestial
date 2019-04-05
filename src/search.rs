@@ -4,6 +4,25 @@ use crate::movegen::*;
 use crate::attack::*;
 use crate::io::*;
 
+pub struct SearchInfo {
+
+    pub start_time: i32,
+    pub stop_time: i32,
+
+    pub depth: i32,
+    pub depth_set: i32,
+
+    pub time_set: i32,
+    pub moves_to_go: i32,
+
+    pub infinite: bool,
+
+    pub nodes: i32,
+
+    pub quite: bool,
+    pub stopped: bool
+}
+
 
 use std::time::{Duration, Instant};
 
