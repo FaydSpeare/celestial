@@ -42,7 +42,7 @@ pub fn uci_loop(){
                     },
                     "position" => {
                         pos = parse_position(words);
-                        //print(&pos);
+                        print(&pos);
                     },
                     "ucinewgame" => {
                         pos = parse_position(words);

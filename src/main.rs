@@ -49,59 +49,7 @@ use types::Square::*;
 fn main() {
     init();
 
-    //uci_loop();
-
-    let mut list: [[i32; 13]; 13] = [[0; 13]; 13];
-
-    let values = [100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600, 0];
-
-    for i in 0..13 {
-        for j in 0..13 {
-
-            let attack = match i {
-                0 => W_PAWN,
-                1 => W_KNIGHT,
-                2 => W_BISHOP, 
-                3 => W_ROOK, 
-                4 => W_QUEEN, 
-                5 => W_KING, 
-                6 => B_PAWN, 
-                7 => B_KNIGHT, 
-                8 => B_BISHOP, 
-                9 => B_ROOK, 
-                10 => B_QUEEN, 
-                11 => B_KING, 
-                12 => EMPTY,
-                _ => panic!()
-            };
-
-            let defend = match j {
-                0 => W_PAWN,
-                1 => W_KNIGHT,
-                2 => W_BISHOP, 
-                3 => W_ROOK, 
-                4 => W_QUEEN, 
-                5 => W_KING, 
-                6 => B_PAWN, 
-                7 => B_KNIGHT, 
-                8 => B_BISHOP, 
-                9 => B_ROOK, 
-                10 => B_QUEEN, 
-                11 => B_KING, 
-                12 => EMPTY,
-                _ => panic!()
-            };
-
-            let score = values[j] - values[i] + values[j]/10;
-            println!("{:?} attacks {:?} = {}", attack, defend, score);
-
-            list[i][j] = score;
-        }
-    }
-
-    println!("{}", list[0][10]);
-    println!("{:?}", list);
-    
+    uci_loop();
 
 }
 

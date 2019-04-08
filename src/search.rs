@@ -60,6 +60,20 @@ impl SearchInfo {
     }
 }
 
+pub fn order(list: &mut Vec<Motion>, index: usize){
+
+    let mut s = -1000000;
+    let mut b = index;
+
+    for i in index..(list.len()){
+        if list[i].score > s {
+            s = list[i].score;
+            b = i;
+        }
+    }
+
+    list.swap(index, b);
+}
 
 
 pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, info: &mut SearchInfo, null: bool) -> i32 {
@@ -82,12 +96,21 @@ pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, inf
     let mut move_num = 0;
     let mut legal = 0;
     let old_alpha = alpha;
-    let mut best_move = &Motion::new();
+    //let mut best_move = &Motion::new();
+    let mut best_index = 0;
     let mut score = -INF;
 
-    for m in list.iter() {
+    for index in 0..(list.len()) {
 
-        if !pos.do_motion(m) {
+        // ordering //
+
+        order(&mut list, index);
+
+        //
+
+        //let m = &list[index];
+
+        if !pos.do_motion(&list[index]) {
             continue;
         }
 
@@ -104,7 +127,8 @@ pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, inf
                 return beta;
             }
             alpha = score;
-            best_move = m;
+            //best_move = m;
+            best_index = index;
         }
     }
 
@@ -125,7 +149,7 @@ pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, inf
     }
 
     if old_alpha != alpha {
-        pos.pv_table.insert(pos.pos_key, best_move.motion);
+        pos.pv_table.insert(pos.pos_key, *(&list[best_index].motion));
     }
 
     return alpha;
