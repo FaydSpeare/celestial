@@ -128,7 +128,9 @@ pub fn parse_go(pos: &mut Position) {
     
     pos.do_motion(m)*/
 
-    iterative_deepening(3000 ,pos);
+    //iterative_deepening(3000 ,pos);
+    let mut si = SearchInfo::new();
+    think(pos, &mut si);
 
 }
 

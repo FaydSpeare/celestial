@@ -21,6 +21,7 @@ mod io;
 mod mcts;
 mod uci;
 mod search;
+mod evaluation;
 
 /* SCOPE */
 use types::*;
@@ -36,188 +37,74 @@ use io::*;
 use mcts::*;
 use uci::*;
 use search::*;
+use evaluation::*;
+
+use types::Piece::*;
 
 use rand::Rng;
 use std::time::{Duration, Instant};
-//use std::io;
 
 use types::Square::*;
 
 fn main() {
     init();
 
-    uci_loop();
-    /*
-    println!("hello");
-    
-    let mut p = parse_fen_string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    //let mut p = parse_fen_string("R6r/8/8/2K5/5k2/8/8/r6R w - - 0 1");
-    print(&p);
-    */
-    
-    /*
-    let m = Motion {
-        motion: MOVE_INT!(6,7, 0, 0),
-        score: 0
-    };
-    p.do_motion(&m);
-    print(&p);
-    
-    let m = Motion {
-        motion: MOVE_INT!(16, 8, 0, 0),
-        score: 0
-    };
-    p.do_motion(&m);
-    print(&p);
-    
-    let m = Motion {
-        motion: MOVE_INT!(4, 11, 0, 0),
-        score: 0
-    };
-    p.do_motion(&m);
-    print(&p);
-    
-    let m = Motion {
-        motion: MOVE_INT!(42, 27, 0, 0),
-        score: 0
-    };
-    p.do_motion(&m);
-    print(&p);
-    
-    */
+    //uci_loop();
 
-    /*
-    let mut l = 0;
-    perft(3, &mut p, &mut l);
-    println!("{}", l);
-    */
-    
-    
-    
-    /*
-    let mut av = 0;
-    for i in 0..1 {
-        av += simulate(&mut p);
-    }
-    println!("average: {}", av/1);
-    */
-    
-    /*
-    
-    for k in 0..3000 {
-        
-        let mut list: Vec<Motion> = vec![];
-        if p.side_to_move {
-            gen_white_moves(&mut list, &p);
-        } else {
-            gen_black_moves(&mut list, &p);
-        }
-        let index = run_mcts(&mut p, &list);
-        println!("{}", index);
-        p.do_motion(&list[index]);
-        //print(&p);
-        print(&p);
+    let mut list: [[i32; 13]; 13] = [[0; 13]; 13];
 
-        loop {
-            let mut input_text = String::new();
-            std::io::stdin().read_line(&mut input_text)
-                .expect("failed to read from stdin");
+    let values = [100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600, 0];
 
-            let trimmed = input_text.trim();
-            let from = match trimmed.parse::<u32>() {
-                Ok(i) => { 
-                    println!("your move from input: {}", i);
-                    i
-                },
-                Err(..) => panic!(),
-            };
-            let mut input_text = String::new();
-            std::io::stdin().read_line(&mut input_text)
-                .expect("failed to read from stdin");
+    for i in 0..13 {
+        for j in 0..13 {
 
-            let trimmed = input_text.trim();
-            let to = match trimmed.parse::<u32>() {
-                Ok(i) => { 
-                    println!("your move to input: {}", i);
-                    i
-                },
-                Err(..) => panic!(),
+            let attack = match i {
+                0 => W_PAWN,
+                1 => W_KNIGHT,
+                2 => W_BISHOP, 
+                3 => W_ROOK, 
+                4 => W_QUEEN, 
+                5 => W_KING, 
+                6 => B_PAWN, 
+                7 => B_KNIGHT, 
+                8 => B_BISHOP, 
+                9 => B_ROOK, 
+                10 => B_QUEEN, 
+                11 => B_KING, 
+                12 => EMPTY,
+                _ => panic!()
             };
 
-            let mut list: Vec<Motion> = vec![];
-            if p.side_to_move {
-                gen_white_moves(&mut list, &p);
-            } else {
-                gen_black_moves(&mut list, &p);
-            }
+            let defend = match j {
+                0 => W_PAWN,
+                1 => W_KNIGHT,
+                2 => W_BISHOP, 
+                3 => W_ROOK, 
+                4 => W_QUEEN, 
+                5 => W_KING, 
+                6 => B_PAWN, 
+                7 => B_KNIGHT, 
+                8 => B_BISHOP, 
+                9 => B_ROOK, 
+                10 => B_QUEEN, 
+                11 => B_KING, 
+                12 => EMPTY,
+                _ => panic!()
+            };
 
-            let mut b = false;
-            for i in 0..list.len() {
-                if list[i].from() as u32 == from {
-                    if list[i].to() as u32 == to {
-                        p.do_motion(&list[i]);
-                        b = true;
-                        break;
-                    }
-                }
-            }
+            let score = values[j] - values[i] + values[j]/10;
+            println!("{:?} attacks {:?} = {}", attack, defend, score);
 
-            if b {
-                break;
-            }
+            list[i][j] = score;
         }
-
-        print(&p);
-
     }
-    */
-    /*
 
-    let start = Instant::now();
-    divide(5, &mut p);
-    let duration = start.elapsed();
-    println!("Time elapsed in expensive_function() is: {:?}ms", duration.as_millis());
+    println!("{}", list[0][10]);
+    println!("{:?}", list);
     
-
-    
-    
-    
-    //play_game(&mut p);
-    
-   
-
-    */
 
 }
 
-fn play_game(pos: &mut Position) {
-
-    let mut rng = rand::thread_rng();
-
-    let mut list: Vec<Motion> = vec![];
-
-    if pos.side_to_move {
-        gen_white_moves(&mut list, pos);
-    } else {
-        gen_black_moves(&mut list, pos);
-    }
-    let mut i = 0;
-    while list.len() != 0 && i < 50{
-
-        pos.do_motion(&list[rng.gen_range(0, list.len())]);
-        
-        list = vec![];
-        if pos.side_to_move {
-            gen_white_moves(&mut list, pos);
-        } else {
-            gen_black_moves(&mut list, pos);
-        }
-
-        print(&pos);
-        i += 1;
-    }
-
-}
 
 fn divide(depth: i32, pos: &mut Position){
 

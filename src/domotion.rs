@@ -173,6 +173,7 @@ impl Position {
         }
 
         self.ply += 1;
+        self.search_ply += 1;
 
         
 
@@ -273,6 +274,8 @@ impl Position {
         };
 
         self.ply -= 1;
+        self.search_ply -= 1;
+
 
         let from = undo_motion.from() as usize;
         let to = undo_motion.to() as usize;

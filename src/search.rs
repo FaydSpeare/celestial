@@ -3,10 +3,16 @@ use crate::motion::*;
 use crate::movegen::*;
 use crate::attack::*;
 use crate::io::*;
+use crate::evaluation::*;
+
+use std::collections::HashMap;
+use std::time::{Duration, Instant};
+
+pub const INF: i32 = 1000000;
 
 pub struct SearchInfo {
 
-    pub start_time: i32,
+    pub start_time: Instant,
     pub stop_time: i32,
 
     pub depth: i32,
@@ -19,12 +25,217 @@ pub struct SearchInfo {
 
     pub nodes: i32,
 
-    pub quite: bool,
-    pub stopped: bool
+    pub quit: bool,
+    pub stopped: bool,
+
+    pub fail_high: f32,
+    pub fail_high_first: f32
+
+} 
+
+impl SearchInfo {
+
+    pub fn new() -> SearchInfo {
+
+        SearchInfo {
+            start_time: Instant::now(),
+            stop_time: 0,
+
+            depth: 0,
+            depth_set: 0,
+
+            time_set: 0,
+            moves_to_go: 0,
+
+            infinite: false,
+
+            nodes: 0,
+
+            quit: false,
+            stopped: false,
+
+            fail_high: 0.0,
+            fail_high_first: 0.0
+        }
+    }
 }
 
 
-use std::time::{Duration, Instant};
+
+pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, info: &mut SearchInfo, null: bool) -> i32 {
+    
+    if depth == 0 {
+        //return quiescence(alpha, beta, pos, info);
+        info.nodes += 1;
+        return eval(pos);
+    }
+
+    info.nodes += 1;
+
+    if check_3_fold(pos) || pos.fifty >= 100 {
+        return 0;
+    }
+
+    let mut list: Vec<Motion> = vec![];
+    gen_legal_moves(&mut list, pos);
+
+    let mut move_num = 0;
+    let mut legal = 0;
+    let old_alpha = alpha;
+    let mut best_move = &Motion::new();
+    let mut score = -INF;
+
+    for m in list.iter() {
+
+        if !pos.do_motion(m) {
+            continue;
+        }
+
+        legal += 1;
+        score = -alpha_beta(-beta, -alpha, depth-1, pos, info, true);
+        pos.undo_motion();
+
+        if score > alpha {
+            if score >= beta {
+
+                if legal == 1 { info.fail_high_first += 1.0}
+                info.fail_high += 1.0;
+
+                return beta;
+            }
+            alpha = score;
+            best_move = m;
+        }
+    }
+
+    if legal == 0 {
+        if pos.side_to_move {
+            if is_attacked_by(pos, pos.king_sq[0] as usize, false) {
+                 return -1000000 + pos.search_ply;
+            } else {
+                return 0;
+            }
+        } else {
+            if is_attacked_by(pos, pos.king_sq[1] as usize, true) {
+                return -1000000 + pos.search_ply;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    if old_alpha != alpha {
+        pos.pv_table.insert(pos.pos_key, best_move.motion);
+    }
+
+    return alpha;
+    
+}
+
+pub fn think(pos: &mut Position, info: &mut SearchInfo){
+
+    let mut best_move: u16 = 0;
+    let mut best_score = -INF;
+    let mut pv_moves = 0;
+    let mut pv_num = 0;
+
+    clear_for_search(pos, info);
+
+    for depth in 1..=(7) {
+
+        best_score = alpha_beta(-INF, INF, depth, pos, info, true);
+        best_move = *pos.pv_table.get(&pos.pos_key).unwrap();
+        print!("Depth:{} score:{} move:", depth, best_score);
+        print_move(&Motion {
+            motion: best_move,
+            score: 0
+        });
+        print!(" nodes:{} ordering:{:.2}", info.nodes, info.fail_high_first/info.fail_high);
+        print_pv(pos, depth);
+        println!();
+    }
+
+    pos.do_motion(&Motion {
+            motion: best_move,
+            score: 0
+    });
+
+    print!("bestmove ");
+    print_move(&Motion {
+            motion: best_move,
+            score: 0
+    });
+
+
+
+}
+
+pub fn print_pv(pos: &mut Position, depth: i32){
+    print!(" pv");
+
+    let mut count = 0;
+    for i in 0..depth {
+        match pos.pv_table.get(&pos.pos_key) {
+            Some(t) => {
+                let m = &Motion {
+            motion: *t,
+            score: 0
+            };
+            pos.do_motion(m);
+            print!(" ");
+            print_move(m);
+            count += 1;
+            }
+            _ => ()
+        }
+    }
+
+    for i in 0..count {
+        pos.undo_motion();
+    }
+}
+
+/*
+pub fn quiescence(alpha: i32, beta: i32, pos: &mut Position, info: &mut SearchInfo) -> i32 {
+    info.nodes += 1;
+
+    if check_3_fold(pos) || pos.fifty >= 100 {
+        return 0;
+    }
+
+    let score = eval(pos);
+
+    if score >= beta {
+        return beta;
+    }
+
+    if score > alpha {
+        alpha = score;
+    }
+
+    if old_alpha != alpha {
+        pos.pv_table.insert(pos.pos_key, best_move.motion);
+    }
+
+    return alpha;
+}
+*/
+
+pub fn clear_for_search(pos: &mut Position, info: &mut SearchInfo) {
+
+    pos.search_history = [[0; 64]; 13];
+    pos.search_killers = [[0; 100]; 2];
+
+    pos.pv_table = HashMap::new();
+    pos.search_ply = 0;
+
+    info.start_time = Instant::now();
+    info.stopped = false;
+    info.nodes = 0;
+    info.fail_high_first = 0.0;
+    info.fail_high = 0.0;
+
+}
 
 
 pub fn iterative_deepening(time: u128, pos: &mut Position) {
@@ -154,44 +365,12 @@ pub fn minimax(depth: i32, pos: &mut Position, player: bool, k: &mut i32) -> i32
 
 }
 
-pub fn eval(pos: &Position) -> i32 {
-    let mut eval = 0;
-
-    eval += pos.material[0];
-
-    eval -= pos.material[1];
-
-    if pos.side_to_move {
-        if is_attacked_by(pos, pos.king_sq[1] as usize, true) {
-            eval += 1000000;
-        }
-
-    } else {
-        if is_attacked_by(pos, pos.king_sq[0] as usize, false) {
-            eval -= 1000000;
-        }
-    }
-
-
-
-    
-    //println!("{}", eval);
-    eval
-}
-
 pub fn check_3_fold(pos: &Position) -> bool {
     let key = pos.pos_key;
-    let mut count = 0;
-
     for i in pos.history.iter() {
         if key == i.pos_key {
-            count += 1;
+            return true;
         }
     }
-
-    if count > 1 {
-        return true;
-    }
-
     false
 }

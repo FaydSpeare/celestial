@@ -6,6 +6,23 @@ use bitintr::*;
 
 /* Const Arrays */
 
+pub const MVV_LVA: [[i32; 13]; 13] = [
+                                    [10, 120, 230, 340, 450, 560, 10, 120, 230, 340, 450, 560, -100], 
+                                    [-90, 20, 130, 240, 350, 460, -90, 20, 130, 240, 350, 460, -200], 
+                                    [-190, -80, 30, 140, 250, 360, -190, -80, 30, 140, 250, 360, -300],
+                                    [-290, -180, -70, 40, 150, 260, -290, -180, -70, 40, 150, 260, -400], 
+                                    [-390, -280, -170, -60, 50, 160, -390, -280, -170, -60, 50, 160, -500], 
+                                    [-490, -380, -270, -160, -50, 60, -490, -380, -270, -160, -50, 60, -600], 
+                                    [10, 120, 230, 340, 450, 560, 10, 120, 230, 340, 450, 560, -100], 
+                                    [-90, 20, 130, 240, 350, 460, -90, 20, 130, 240, 350, 460, -200], 
+                                    [-190, -80, 30, 140, 250, 360, -190, -80, 30, 140, 250, 360, -300], 
+                                    [-290, -180, -70, 40, 150, 260, -290, -180, -70, 40, 150, 260, -400], 
+                                    [-390, -280, -170, -60, 50, 160, -390, -280, -170, -60, 50, 160, -500], 
+                                    [-490, -380, -270, -160, -50, 60, -490, -380, -270, -160, -50, 60, -600], 
+                                    [110, 220, 330, 440, 550, 660, 110, 220, 330, 440, 550, 660, 0]
+                                    ];
+
+
 
 pub const KING_MOVES: [u64; 64] = [0x302, 0x705, 0xe0a, 0x1c14, 0x3828, 0x7050, 0xe0a0, 0xc040,
                                    0x30203, 0x70507, 0xe0a0e, 0x1c141c, 0x382838, 0x705070, 0xe0a0e0, 0xc040c0,
@@ -97,28 +114,6 @@ pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
     let foc: u64 = occ & ANTI_DIAG_MASK[index];
     ((foc.wrapping_sub(SET_MASK[sq].wrapping_mul(2))) ^ (foc.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit()) & ANTI_DIAG_MASK[index]
 }
-
-
-/*
-WORKING FINE
-
-
-pub fn diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
-    let foc: u64 = (occ | RANK_MASK[0] | FILE_MASK[7] | RANK_MASK[7] | FILE_MASK[0]) & DIAG_MASK[(sq/8)+(sq%8)];
-    let right: u64 = (foc.wrapping_sub(SET_MASK[sq].wrapping_mul(2)));
-    let left: u64 = (foc.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit();
-    (right ^ left) & DIAG_MASK[(sq/8)+(sq%8)]
-}
-
-pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
-    let foc: u64 = (occ | RANK_MASK[0] | RANK_MASK[7] | FILE_MASK[0] | FILE_MASK[7]) & ANTI_DIAG_MASK[(sq/8)+7-(sq%8)];
-    let right: u64 = (foc.wrapping_sub(SET_MASK[sq].wrapping_mul(2)));
-    let left: u64 = (foc.rbit().wrapping_sub(SET_MASK[sq].rbit().wrapping_mul(2))).rbit();
-    (right ^ left) & ANTI_DIAG_MASK[(sq/8)+7-(sq%8)]
-}
-*/
-
-
 
 /* MOTION LIST ADDERS */
 

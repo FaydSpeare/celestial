@@ -18,7 +18,7 @@ pub struct Position {
     pub castling_rights: u8,
 
     pub ply: i32,
-    pub his_ply: i32,
+    pub search_ply: i32,
 
     pub pos_key: Key,
 
@@ -39,8 +39,8 @@ pub struct Position {
     pub piece_list: [Vec<i32>; 12],
 
     // PV Table
-    pub pv_table: HashMap<Key, Motion>,
-    pub pv_array: Vec<i32>,
+    pub pv_table: HashMap<Key, u16>,
+    pub pv_array: Vec<u16>,
 
     // Search Arrays
     pub search_history: [[i32; 64]; 13],
@@ -129,7 +129,7 @@ impl Position {
             castling_rights: 0,
 
             ply: 0,
-            his_ply: 0,
+            search_ply: 0,
 
             pos_key: 0u64,
 
@@ -187,7 +187,7 @@ impl Position {
         self.ep = Square::NO_SQ as i32;
 
         self.ply = 0;
-        self.his_ply = 0;
+        self.search_ply = 0;
 
         self.castling_rights = 0;
         self.pos_key = 0u64;
