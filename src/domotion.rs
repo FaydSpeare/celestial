@@ -128,7 +128,7 @@ impl Position {
             } else if to == Square::G8 as usize { 
                 self.move_piece(Square::H8 as usize, Square::F8 as usize);
             } else {
-                panic!();
+                panic!("CASTLING BUT NOT CORRECT");
             }
 
         }
@@ -268,8 +268,7 @@ impl Position {
         let undo_motion = match self.history.pop() {
             Some(t) => t,
             _ => {
-                //print(&self);
-                panic!();
+                panic!("PANICKED IN UNDOING MOVE");
             }
         };
 
@@ -328,7 +327,7 @@ impl Position {
             } else if to == Square::G8 as usize { 
                 self.move_piece(Square::F8 as usize, Square::H8 as usize);
             } else {
-                panic!();
+                panic!("CASTLING BUT NOT CORRECT");
             }
 
         }

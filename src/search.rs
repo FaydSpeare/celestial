@@ -197,7 +197,10 @@ pub fn think(pos: &mut Position, info: &mut SearchInfo){
             break;
         }
 
-        best_move = *pos.pv_table.get(&pos.pos_key).unwrap();
+        best_move = match pos.pv_table.get(&pos.pos_key){
+            Some(t) => *t,
+            _ => panic!("PANIC IN THINKING")
+        };
         print!("info score cp {} depth {} nodes {} move ", best_score, depth, info.nodes);
         print_move(&Motion {
             motion: best_move,
@@ -472,10 +475,14 @@ pub fn minimax(depth: i32, pos: &mut Position, player: bool, k: &mut i32) -> i32
 
 pub fn check_3_fold(pos: &Position) -> bool {
     let key = pos.pos_key;
+    let mut count = 0;
     for i in pos.history.iter() {
         if key == i.pos_key {
-            return true;
+            count += 1;
         }
+    }
+    if count > 1 {
+        return true;
     }
     false
 }

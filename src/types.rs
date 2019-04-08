@@ -84,7 +84,7 @@ pub const PIECE_BIG: [bool; 13] = [false, true, true, true, true, true, false, t
 pub const PIECE_MAJOR: [bool; 13] = [false, false, false, true, true, true, false, false, false, true, true, true, false];
 pub const PIECE_MINOR: [bool; 13] = [false, true, true, false, false, false, false, true, true, false, false, false, false];
 pub const PIECE_COLOUR: [i32; 13] = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2];
-pub const PIECE_VALUE: [i32; 13] = [100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000, 0];
+pub const PIECE_VALUE: [i32; 13] = [100, 320, 325, 550, 1000, 50000, 100, 320, 325, 550, 1000, 50000, 0];
 
 pub const PIECE_PAWN: [bool; 13] = [true, false, false, false, false, false, true, false, false, false, false, false, false];
 pub const PIECE_KING: [bool; 13] = [false, false, false, false, false, true, false, false, false, false, false, true, false];

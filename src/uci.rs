@@ -140,7 +140,7 @@ pub fn parse_move(pos: &Position, m: &str) -> Motion {
 
     match chars[1].to_digit(10) {
         Some(d) => from += 8 * (d - 1) as usize,
-        _ => panic!()
+        _ => panic!("panic on parse move 1")
     }
 
     for i in 0..(FILES.len()) {
@@ -151,7 +151,7 @@ pub fn parse_move(pos: &Position, m: &str) -> Motion {
 
     match chars[3].to_digit(10) {
         Some(d) => to += 8 * (d - 1) as usize,
-        _ => panic!()
+        _ => panic!("panic on parse move 1")
     }
 
     if chars.len() == 5 {
