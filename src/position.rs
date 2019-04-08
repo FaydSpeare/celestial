@@ -44,7 +44,7 @@ pub struct Position {
 
     // Search Arrays
     pub search_history: [[i32; 64]; 13],
-    pub search_killers: [[i32; 100]; 2]
+    pub search_killers: [[u16; 100]; 2]
 
 
 }

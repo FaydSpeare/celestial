@@ -49,7 +49,7 @@ pub fn uci_loop(){
                         print(&pos);
                     },
                     "go" => {
-                        parse_go(&mut pos);
+                        parse_go(&mut pos, words);
                         print(&pos);
                     },
                     "quit" => {
@@ -99,37 +99,28 @@ pub fn parse_position(words: Vec<&str>) -> Position {
 
 }
 
-pub fn parse_go(pos: &mut Position) {
-    /*
+pub fn parse_go(pos: &mut Position, words: Vec<&str>) {
 
-    let mut rng = rand::thread_rng();
+    let white_time = words[2].parse::<i32>().unwrap() / 30;
+    let black_time = words[4].parse::<i32>().unwrap() / 30;
 
-    let mut list: Vec<Motion> = vec![];
-    gen_legal_moves(&mut list, pos);
-
-    let m = &list[rng.gen_range(0, list.len())];
-    
-
-    let mut k = 0;
-
-    let mut list: Vec<Motion> = vec![];
-
-    let start = Instant::now();
-    let i = minimax_top(&mut list, 4, pos, &mut k);
-    let duration = start.elapsed();
-    println!("Time elapsed in expensive_function() is: {:?}ms", duration.as_millis());
-    
-    let m = &list[i];
-
-    println!("nodes: {}", k);
-    print!("bestmove ");
-    print_move(m);
-    println!();
-    
-    pos.do_motion(m)*/
-
-    //iterative_deepening(3000 ,pos);
     let mut si = SearchInfo::new();
+
+    if pos.side_to_move {
+        si.stop_time = white_time;
+    } else {
+        si.stop_time = black_time;
+    }
+
+    if words.len() == 9 {
+        let white_time = words[6].parse::<i32>().unwrap() * 3/4;
+        let black_time = words[8].parse::<i32>().unwrap() * 3/4;
+        if pos.side_to_move {
+            si.stop_time += white_time;
+        } else {
+            si.stop_time += black_time;
+        }
+    }
     think(pos, &mut si);
 
 }
