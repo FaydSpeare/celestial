@@ -101,10 +101,23 @@ pub fn parse_position(words: Vec<&str>) -> Position {
 
 pub fn parse_go(pos: &mut Position, words: Vec<&str>) {
 
-    let white_time = words[2].parse::<i32>().unwrap() / 30;
-    let black_time = words[4].parse::<i32>().unwrap() / 30;
-
     let mut si = SearchInfo::new();
+    let mut white_time = words[2].parse::<i32>().unwrap() / 30;
+    let mut black_time = words[4].parse::<i32>().unwrap() / 30;
+
+    if white_time*30 < 2000 {
+        white_time /= 5;
+    } else if white_time*30 < 20000 {
+        white_time /= 2;
+    }
+   
+    if black_time*30 < 2000 {
+        black_time /= 5;
+    } else if black_time*30 < 20000 {
+        black_time /= 2;
+    }
+
+    
 
     if pos.side_to_move {
         si.stop_time = white_time;

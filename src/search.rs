@@ -188,8 +188,6 @@ pub fn think(pos: &mut Position, info: &mut SearchInfo){
     clear_for_search(pos, info);
 
     for depth in 1..=(30) {
-        let start = Instant::now();
-    
 
         best_score = alpha_beta(-INF, INF, depth, pos, info, true);
 
@@ -209,8 +207,6 @@ pub fn think(pos: &mut Position, info: &mut SearchInfo){
         print!(" ordering:{:.2}", info.fail_high_first/info.fail_high);
         print_pv(pos, depth);
         println!();
-        let mut duration = start.elapsed();
-        println!("Time elapsed in expensive_function() is: {:?}ms", duration.as_millis());
     }
 
     pos.do_motion(&Motion {
