@@ -6,6 +6,7 @@ use crate::types::*;
 use crate::io::*;
 use crate::attack::*;
 use crate::search::*;
+use crate::evaluation::*;
 
 use std::io;
 use rand::Rng;
@@ -55,6 +56,24 @@ pub fn uci_loop(){
                     "quit" => {
                         quit = true;
                     },
+                    "eval" => {
+                        println!("{}", eval(&pos));
+                    },
+                    "moves" => {
+                        let mut list: Vec<Motion> = vec![];
+                        gen_moves(&mut list, &pos);
+                        println!("{}", list.len());
+                        for m in list {
+                            pos.do_motion(&m);
+                            print_move(&m);
+                            println!("{}", eval(&pos));
+                            pos.undo_motion();
+                        }
+                        
+                        for i in 0..64 {
+                            println!("({} -> {})", i, transform_white(i))
+                        }
+                    }
                     _ => ()
                 }
 
