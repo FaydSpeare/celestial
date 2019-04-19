@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
 pub const INF: i32 = 1000000;
+pub const MATE: i32 = 30000;
 
 pub struct SearchInfo {
 
@@ -65,6 +66,10 @@ impl SearchInfo {
             self.stopped = true;
         }
     }
+
+    pub fn nps(&self) -> i32 {
+        ((self.nodes as f32 / self.start_time.elapsed().as_millis() as f32) * 1000.0) as i32
+    }
 }
 
 pub fn order(list: &mut Vec<Motion>, index: usize){
@@ -87,8 +92,6 @@ pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, inf
     
     if depth == 0 {
         return quiescence(alpha, beta, pos, info);
-        //info.nodes += 1;
-        //return eval(pos);
     }
 
     if info.nodes % 10000 == 0 {
@@ -110,6 +113,18 @@ pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, inf
     //let mut best_move = &Motion::new();
     let mut best_index = 0;
     let mut score = -INF;
+
+    match pos.pv_table.get(&pos.pos_key) {
+        Some(t) => {
+            for index in 0..(list.len()) {
+                if &list[index].motion == t {
+                    list[index].score = 2000000;
+                    break;
+                }
+            }
+        },
+        _ => ()
+    }
 
     for index in 0..(list.len()) {
 
@@ -139,36 +154,43 @@ pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, inf
                 if legal == 1 { info.fail_high_first += 1.0}
                 info.fail_high += 1.0;
 
-                /*
-                if pos.board[*&list[index].to() as usize] == Piece::EMPTY as i32 {
+                
+                if !(&list[index].capture) {
                     pos.search_killers[1][pos.search_ply as usize] = pos.search_killers[0][pos.search_ply as usize];
                     pos.search_killers[0][pos.search_ply as usize] =  list[index].motion;
                 }
-                */
+                
+                
+                
 
                 return beta;
             }
             alpha = score;
 
             best_index = index;
+
+            if !(&list[index].capture) {
+                pos.search_history[pos.board[*&list[index].from() as usize] as usize][*&list[index].to() as usize] += depth;
+            }
         }
     }
 
     if legal == 0 {
         if pos.side_to_move {
             if is_attacked_by(pos, pos.king_sq[0] as usize, false) {
-                 return -1000000 + pos.search_ply;
+                 return -MATE + pos.search_ply;
             } else {
                 return 0;
             }
         } else {
             if is_attacked_by(pos, pos.king_sq[1] as usize, true) {
-                return -1000000 + pos.search_ply;
+                return -MATE + pos.search_ply;
             } else {
                 return 0;
             }
         }
     }
+
 
     if old_alpha != alpha {
         pos.pv_table.insert(pos.pos_key, *(&list[best_index].motion));
@@ -178,7 +200,7 @@ pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, inf
     
 }
 
-pub fn think(pos: &mut Position, info: &mut SearchInfo){
+pub fn think(pos: &mut Position, info: &mut SearchInfo, d: i32){
 
     let mut best_move: u16 = 0;
     let mut best_score = -INF;
@@ -187,7 +209,7 @@ pub fn think(pos: &mut Position, info: &mut SearchInfo){
 
     clear_for_search(pos, info);
 
-    for depth in 1..=(30) {
+    for depth in 1..=(d) {
 
         best_score = alpha_beta(-INF, INF, depth, pos, info, true);
 
@@ -199,10 +221,11 @@ pub fn think(pos: &mut Position, info: &mut SearchInfo){
             Some(t) => *t,
             _ => panic!("PANIC IN THINKING")
         };
-        print!("info score cp {} depth {} nodes {} move ", best_score, depth, info.nodes);
+        print!("info score cp {} depth {} nodes {} nps {} move ", best_score, depth, info.nodes, info.nps());
         print_move(&Motion {
             motion: best_move,
-            score: 0
+            score: 0,
+            capture: false
         });
         print!(" ordering:{:.2}", info.fail_high_first/info.fail_high);
         print_pv(pos, depth);
@@ -211,13 +234,15 @@ pub fn think(pos: &mut Position, info: &mut SearchInfo){
 
     pos.do_motion(&Motion {
             motion: best_move,
-            score: 0
+            score: 0,
+            capture: false
     });
 
     print!("bestmove ");
     print_move(&Motion {
             motion: best_move,
-            score: 0
+            score: 0,
+            capture: false
     });
 
 
@@ -232,13 +257,14 @@ pub fn print_pv(pos: &mut Position, depth: i32){
         match pos.pv_table.get(&pos.pos_key) {
             Some(t) => {
                 let m = &Motion {
-            motion: *t,
-            score: 0
-            };
-            pos.do_motion(m);
-            print!(" ");
-            print_move(m);
-            count += 1;
+                    motion: *t,
+                    score: 0,
+                    capture: false
+                };
+                pos.do_motion(m);
+                print!(" ");
+                print_move(m);
+                count += 1;
             }
             _ => ()
         }

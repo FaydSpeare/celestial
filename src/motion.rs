@@ -4,7 +4,8 @@ pub struct MotionList {
 
 pub struct Motion {
     pub motion: u16,
-    pub score: i32
+    pub score: i32,
+    pub capture: bool
 }
 
 impl Motion {
@@ -12,7 +13,8 @@ impl Motion {
     pub fn new() -> Motion {
         Motion {
             motion: MOVE_INT!(0, 0, 0, Flag::NONE as u16),
-            score: 0
+            score: 0,
+            capture: false
         }
     }
 
@@ -62,6 +64,10 @@ impl Motion {
 
     pub fn is_prom_knight(&self) -> bool {
         self.promotee() == Promotee::KNIGHT as u16
+    }
+
+    pub fn is_capture(&self) -> bool {
+        self.capture
     }
 
 }

@@ -2,6 +2,7 @@ use crate::position::*;
 use crate::attack::*;
 use crate::types::*;
 use crate::movegen::*;
+use crate::search::*;
 use std::collections::HashSet;
 
 pub const PAWN_TABLE: [i32; 64] = [   0,   0,   0,   0,   0,   0,   0,   0, 
@@ -65,13 +66,6 @@ pub const PAWN_END_TABLE: [i32; 64] = [ 0,   0,   0,   0,   0,   0,   0,   0,
                                     ];
         
 
-pub fn for_black(i: i32) -> usize {
-    let rank = (i / 8);
-    let file = i % 8;
-    let ret = ((7 - file) + 8 * (7 - rank)) as usize;
-    return ret;
-}
-
 pub fn transform_white(i: i32) -> usize {
     let rank = (i / 8);
     let file = i % 8;
@@ -80,6 +74,15 @@ pub fn transform_white(i: i32) -> usize {
 }
 
 pub fn eval(pos: &Position) -> i32 {
+
+    /*
+    if pos.side_to_move && is_attacked_by(pos, pos.king_sq[0] as usize, false) {
+        return MATE - pos.search_ply;
+    } else if !pos.side_to_move && is_attacked_by(pos, pos.king_sq[1] as usize, true) {
+        return -MATE + pos.search_ply;
+    }
+    */
+    
     let mut eval = 0;
 
     eval += pos.material[0];
@@ -174,9 +177,15 @@ pub fn eval(pos: &Position) -> i32 {
     for i in 0..8 {
         if (pos.piece_bb[Piece::W_PAWN as usize] & FILE_MASK[i]).count_ones() > 1 {
             eval -= 20;
+            if i == 0 || i == 7 {
+                eval -= 10;
+            }
         }
         if (pos.piece_bb[Piece::B_PAWN as usize] & FILE_MASK[i]).count_ones() > 1 {
             eval += 20;
+            if i == 0 || i == 7 {
+                eval += 10;
+            }
         }
     }
     

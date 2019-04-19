@@ -118,49 +118,122 @@ pub fn anti_diagonal_sliding_attacks(sq: usize, occ: u64) -> u64 {
 
 /* MOTION LIST ADDERS */
 
-// PAWNS - Promotion Flag, EnPassnt Flag
-
-pub fn add_pawn_motion(pos: &Position, motion_list: &mut Vec<Motion>, from: usize, to: usize){
+pub fn add_quiet_motion(pos: &Position, motion_list: &mut Vec<Motion>, from: usize, to: usize){
+    let m = MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16);
+    let s = if pos.search_killers[0][pos.search_ply as usize] == m {
+        900000
+    } else if pos.search_killers[1][pos.search_ply as usize] == m {
+        800000
+    } else {
+        pos.search_history[pos.board[from] as usize][to]
+    };
+    
     motion_list.push(Motion {
-        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
-        score: MVV_LVA[pos.board[from] as usize][pos.board[to] as usize]
+        motion: m,
+        score: s,
+        capture: false
     });
 }
 
+pub fn add_capture_motion(pos: &Position, motion_list: &mut Vec<Motion>, from: usize, to: usize){
+    motion_list.push(Motion {
+        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
+        score: MVV_LVA[pos.board[from] as usize][pos.board[to] as usize] + 1000000,
+        capture: true
+    });
+}
+
+// PAWNS - Promotion Flag, EnPassnt Flag
+
 pub fn add_pawn_promotion(pos: &Position, motion_list: &mut Vec<Motion>, from: usize, to: usize){
+    let cap: bool = pos.board[to] != Piece::EMPTY as i32;
+    let m = MOVE_INT!(from as u16, to as u16, Promotee::QUEEN as u16, Flag::PROMOTION as u16);
+    let sco = if cap {
+        MVV_LVA[pos.board[from] as usize][pos.board[to] as usize] + 1000000
+    } else {
+        if pos.search_killers[0][pos.search_ply as usize] == m {
+            900000
+        } else if pos.search_killers[1][pos.search_ply as usize] == m {
+            800000
+        } else {
+            0
+        }
+    };
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, Promotee::QUEEN as u16, Flag::PROMOTION as u16),
-        score: MVV_LVA[pos.board[from] as usize][pos.board[to] as usize]
+        score: sco,
+        capture: cap
     });
+    let m = MOVE_INT!(from as u16, to as u16, Promotee::ROOK as u16, Flag::PROMOTION as u16);
+    let sco = if cap {
+        MVV_LVA[pos.board[from] as usize][pos.board[to] as usize] + 1000000
+    } else {
+        if pos.search_killers[0][pos.search_ply as usize] == m {
+            900000
+        } else if pos.search_killers[1][pos.search_ply as usize] == m {
+            800000
+        } else {
+            0
+        }
+    };
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, Promotee::ROOK as u16, Flag::PROMOTION as u16),
-        score: MVV_LVA[pos.board[from] as usize][pos.board[to] as usize]
+        score: sco,
+        capture: cap
     });
+    let m = MOVE_INT!(from as u16, to as u16, Promotee::BISHOP as u16, Flag::PROMOTION as u16);
+    let sco = if cap {
+        MVV_LVA[pos.board[from] as usize][pos.board[to] as usize] + 1000000
+    } else {
+        if pos.search_killers[0][pos.search_ply as usize] == m {
+            900000
+        } else if pos.search_killers[1][pos.search_ply as usize] == m {
+            800000
+        } else {
+            0
+        }
+    };
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, Promotee::BISHOP as u16, Flag::PROMOTION as u16),
-        score: MVV_LVA[pos.board[from] as usize][pos.board[to] as usize]
+        score: sco,
+        capture: cap
     });
+    let m = MOVE_INT!(from as u16, to as u16, Promotee::KNIGHT as u16, Flag::PROMOTION as u16);
+    let sco = if cap {
+        MVV_LVA[pos.board[from] as usize][pos.board[to] as usize] + 1000000
+    } else {
+        if pos.search_killers[0][pos.search_ply as usize] == m {
+            900000
+        } else if pos.search_killers[1][pos.search_ply as usize] == m {
+            800000
+        } else {
+            0
+        }
+    };
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, Promotee::KNIGHT as u16, Flag::PROMOTION as u16),
-        score: MVV_LVA[pos.board[from] as usize][pos.board[to] as usize]
+        score: sco,
+        capture: cap
     });
 }
 
 pub fn add_pawn_enpassant_motion(pos: &Position, motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::ENPASSANT as u16),
-        score: MVV_LVA[pos.board[from] as usize][pos.board[to] as usize]
+        score: MVV_LVA[pos.board[from] as usize][pos.board[from] as usize] + 1000000, // from->from as pawn will capture pawn but move to empty square
+        capture: true
     });
 }
 
 // KNIGHTS
-
+/*
 pub fn add_knight_motion(pos: &Position, motion_list: &mut Vec<Motion>, from: usize, to: usize){
     motion_list.push(Motion {
         motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
         score: MVV_LVA[pos.board[from] as usize][pos.board[to] as usize]
     });
 }
+
 
 // BISHOP 
 
@@ -189,6 +262,7 @@ pub fn add_queen_motion(pos: &Position, motion_list: &mut Vec<Motion>, from: usi
     });
 }
 
+
 // KING - Castling Flag
 
 pub fn add_king_motion(pos: &Position, motion_list: &mut Vec<Motion>, from: usize, to: usize){
@@ -197,11 +271,22 @@ pub fn add_king_motion(pos: &Position, motion_list: &mut Vec<Motion>, from: usiz
         score: MVV_LVA[pos.board[from] as usize][pos.board[to] as usize]
     });
 }
+*/
 
 pub fn add_king_castling_motion(pos: &Position, motion_list: &mut Vec<Motion>, from: usize, to: usize){
+    let m = MOVE_INT!(from as u16, to as u16, 0, Flag::CASTLING as u16);
+    let sco = if pos.search_killers[0][pos.search_ply as usize] == m {
+            900000
+    } else if pos.search_killers[1][pos.search_ply as usize] == m {
+            800000
+    } else {
+            0
+    };
+
     motion_list.push(Motion {
-        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::CASTLING as u16),
-        score: MVV_LVA[pos.board[from] as usize][pos.board[from] as usize]
+        motion: m,
+        score: sco,
+        capture: false
     });
 }
 
@@ -218,7 +303,7 @@ pub fn gen_white_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
 
             // PAWN STARTS
             if (SET_MASK[current+8] | SET_MASK[current+16]) & position.colour_bb[Colour::BOTH as usize] == 0 {
-                add_pawn_motion(position, motion_list, current, current + 16);
+                add_quiet_motion(position, motion_list, current, current + 16);
             }
         } 
 
@@ -229,7 +314,7 @@ pub fn gen_white_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
             if current / 8 == 6 {
                 add_pawn_promotion(position, motion_list, current, current + 8);
             } else {
-                add_pawn_motion(position, motion_list, current, current + 8);
+                add_quiet_motion(position, motion_list, current, current + 8);
             }
         }
 
@@ -241,7 +326,7 @@ pub fn gen_white_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
                 if current / 8 == 6 {
                     add_pawn_promotion(position, motion_list, current, current + 9);
                 } else {
-                    add_pawn_motion(position, motion_list, current, current + 9);
+                    add_capture_motion(position, motion_list, current, current + 9);
                 }
                 
             }
@@ -255,7 +340,7 @@ pub fn gen_white_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
                 if current / 8 == 6 {
                     add_pawn_promotion(position, motion_list, current, current + 7);
                 } else {
-                    add_pawn_motion(position, motion_list, current, current + 7);
+                    add_capture_motion(position, motion_list, current, current + 7);
                 }
             }
         }
@@ -291,7 +376,7 @@ pub fn gen_black_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
 
             // PAWN STARTS
             if (SET_MASK[current-8] | SET_MASK[current-16]) & position.colour_bb[Colour::BOTH as usize] == 0 {
-                add_pawn_motion(position, motion_list, current, current - 16);
+                add_quiet_motion(position, motion_list, current, current - 16);
             }
         } 
 
@@ -302,7 +387,7 @@ pub fn gen_black_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
             if current / 8 == 1 {
                 add_pawn_promotion(position, motion_list, current, current - 8);
             } else {
-                add_pawn_motion(position, motion_list, current, current - 8);
+                add_quiet_motion(position, motion_list, current, current - 8);
             }
         }
 
@@ -314,7 +399,7 @@ pub fn gen_black_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
                 if current / 8 == 1 {
                     add_pawn_promotion(position, motion_list, current, current - 7);
                 } else {
-                    add_pawn_motion(position, motion_list, current, current - 7);
+                    add_capture_motion(position, motion_list, current, current - 7);
                 }
                 
             }
@@ -328,7 +413,7 @@ pub fn gen_black_pawn_moves(motion_list: &mut Vec<Motion>, position: &Position) 
                 if current / 8 == 1 {
                     add_pawn_promotion(position, motion_list, current, current - 9);
                 } else {
-                    add_pawn_motion(position, motion_list, current, current - 9);
+                    add_capture_motion(position, motion_list, current, current - 9);
                 }
             }
         }
@@ -367,7 +452,12 @@ pub fn gen_white_knight_moves(motion_list: &mut Vec<Motion>, position: &Position
         while kn_moves != 0 {
             let next = LSB!(kn_moves) as usize;
 
-            add_knight_motion(position, motion_list, current, next);
+            if position.board[next] == Piece::EMPTY as i32 {
+                add_quiet_motion(position, motion_list, current, next);
+            } else {
+                add_capture_motion(position, motion_list, current, next);
+            }
+            
 
             kn_moves ^= 1 << next;
         }
@@ -384,7 +474,11 @@ pub fn gen_black_knight_moves(motion_list: &mut Vec<Motion>, position: &Position
         while kn_moves != 0 {
             let next = LSB!(kn_moves) as usize;
 
-            add_knight_motion(position, motion_list, current, next);
+            if position.board[next] == Piece::EMPTY as i32 {
+                add_quiet_motion(position, motion_list, current, next);
+            } else {
+                add_capture_motion(position, motion_list, current, next);
+            }
 
             kn_moves ^= 1 << next;
         }
@@ -403,7 +497,11 @@ pub fn gen_white_bishop_moves(motion_list: &mut Vec<Motion>, position: &Position
         while bishop_moves != 0 {
             let next = LSB!(bishop_moves) as usize;
 
-            add_bishop_motion(position, motion_list, current, next);
+            if position.board[next] == Piece::EMPTY as i32 {
+                add_quiet_motion(position, motion_list, current, next);
+            } else {
+                add_capture_motion(position, motion_list, current, next);
+            }
 
             bishop_moves ^= 1 << next;
         }
@@ -420,7 +518,11 @@ pub fn gen_black_bishop_moves(motion_list: &mut Vec<Motion>, position: &Position
         while bishop_moves != 0 {
             let next = LSB!(bishop_moves) as usize;
 
-            add_bishop_motion(position, motion_list, current, next);
+            if position.board[next] == Piece::EMPTY as i32 {
+                add_quiet_motion(position, motion_list, current, next);
+            } else {
+                add_capture_motion(position, motion_list, current, next);
+            }
 
             bishop_moves ^= 1 << next;
         }
@@ -439,7 +541,11 @@ pub fn gen_white_rook_moves(motion_list: &mut Vec<Motion>, position: &Position){
         while rook_moves != 0 {
             let next = LSB!(rook_moves) as usize;
 
-            add_rook_motion(position, motion_list, current, next);
+            if position.board[next] == Piece::EMPTY as i32 {
+                add_quiet_motion(position, motion_list, current, next);
+            } else {
+                add_capture_motion(position, motion_list, current, next);
+            }
 
             rook_moves ^= 1 << next;
         }
@@ -456,7 +562,11 @@ pub fn gen_black_rook_moves(motion_list: &mut Vec<Motion>, position: &Position){
         while rook_moves != 0 {
             let next = LSB!(rook_moves) as usize;
 
-            add_rook_motion(position, motion_list, current, next);
+            if position.board[next] == Piece::EMPTY as i32 {
+                add_quiet_motion(position, motion_list, current, next);
+            } else {
+                add_capture_motion(position, motion_list, current, next);
+            }
 
             rook_moves ^= 1 << next;
         }
@@ -474,7 +584,11 @@ pub fn gen_white_queen_moves(motion_list: &mut Vec<Motion>, position: &Position)
         while queen_moves != 0 {
             let next = LSB!(queen_moves) as usize;
 
-            add_queen_motion(position, motion_list, current, next);
+            if position.board[next] == Piece::EMPTY as i32 {
+                add_quiet_motion(position, motion_list, current, next);
+            } else {
+                add_capture_motion(position, motion_list, current, next);
+            }
 
             queen_moves ^= 1 << next;
         }
@@ -491,7 +605,11 @@ pub fn gen_black_queen_moves(motion_list: &mut Vec<Motion>, position: &Position)
         while queen_moves != 0 {
             let next = LSB!(queen_moves) as usize;
 
-            add_queen_motion(position, motion_list, current, next);
+            if position.board[next] == Piece::EMPTY as i32 {
+                add_quiet_motion(position, motion_list, current, next);
+            } else {
+                add_capture_motion(position, motion_list, current, next);
+            }
 
             queen_moves ^= 1 << next;
         }
@@ -507,7 +625,11 @@ pub fn gen_white_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
     while king_moves != 0 {
         let next = LSB!(king_moves) as usize;
 
-        add_king_motion(position, motion_list, current, next);
+        if position.board[next] == Piece::EMPTY as i32 {
+            add_quiet_motion(position, motion_list, current, next);
+        } else {
+            add_capture_motion(position, motion_list, current, next);
+        }
 
         king_moves ^= 1 << next;
     }
@@ -536,7 +658,11 @@ pub fn gen_black_king_moves(motion_list: &mut Vec<Motion>, position: &Position){
     while king_moves != 0 {
         let next = LSB!(king_moves) as usize;
 
-        add_king_motion(position, motion_list, current, next);
+        if position.board[next] == Piece::EMPTY as i32 {
+            add_quiet_motion(position, motion_list, current, next);
+        } else {
+            add_capture_motion(position, motion_list, current, next);
+        }
 
         king_moves ^= 1 << next;
     }
@@ -633,7 +759,7 @@ pub fn gen_white_captures(motion_list: &mut Vec<Motion>, position: &Position) {
                 if current / 8 == 6 {
                     add_pawn_promotion(position, motion_list, current, current + 9);
                 } else {
-                    add_pawn_motion(position, motion_list, current, current + 9);
+                    add_capture_motion(position, motion_list, current, current + 9);
                 }
                 
             }
@@ -647,7 +773,7 @@ pub fn gen_white_captures(motion_list: &mut Vec<Motion>, position: &Position) {
                 if current / 8 == 6 {
                     add_pawn_promotion(position, motion_list, current, current + 7);
                 } else {
-                    add_pawn_motion(position, motion_list, current, current + 7);
+                    add_capture_motion(position, motion_list, current, current + 7);
                 }
             }
         }
@@ -680,7 +806,7 @@ pub fn gen_white_captures(motion_list: &mut Vec<Motion>, position: &Position) {
         while kn_moves != 0 {
             let next = LSB!(kn_moves) as usize;
 
-            add_knight_motion(position, motion_list, current, next);
+            add_capture_motion(position, motion_list, current, next);
 
             kn_moves ^= 1 << next;
         }
@@ -694,7 +820,7 @@ pub fn gen_white_captures(motion_list: &mut Vec<Motion>, position: &Position) {
         while bishop_moves != 0 {
             let next = LSB!(bishop_moves) as usize;
 
-            add_bishop_motion(position, motion_list, current, next);
+            add_capture_motion(position, motion_list, current, next);
 
             bishop_moves ^= 1 << next;
         }
@@ -708,7 +834,7 @@ pub fn gen_white_captures(motion_list: &mut Vec<Motion>, position: &Position) {
         while rook_moves != 0 {
             let next = LSB!(rook_moves) as usize;
 
-            add_rook_motion(position, motion_list, current, next);
+            add_capture_motion(position, motion_list, current, next);
 
             rook_moves ^= 1 << next;
         }
@@ -722,7 +848,7 @@ pub fn gen_white_captures(motion_list: &mut Vec<Motion>, position: &Position) {
         while queen_moves != 0 {
             let next = LSB!(queen_moves) as usize;
 
-            add_queen_motion(position, motion_list, current, next);
+            add_capture_motion(position, motion_list, current, next);
 
             queen_moves ^= 1 << next;
         }
@@ -734,7 +860,7 @@ pub fn gen_white_captures(motion_list: &mut Vec<Motion>, position: &Position) {
     while king_moves != 0 {
         let next = LSB!(king_moves) as usize;
 
-        add_king_motion(position, motion_list, current, next);
+        add_capture_motion(position, motion_list, current, next);
 
         king_moves ^= 1 << next;
     }
@@ -753,7 +879,7 @@ pub fn gen_black_captures(motion_list: &mut Vec<Motion>, position: &Position) {
                 if current / 8 == 1 {
                     add_pawn_promotion(position, motion_list, current, current - 7);
                 } else {
-                    add_pawn_motion(position, motion_list, current, current - 7);
+                    add_capture_motion(position, motion_list, current, current - 7);
                 }
                 
             }
@@ -767,7 +893,7 @@ pub fn gen_black_captures(motion_list: &mut Vec<Motion>, position: &Position) {
                 if current / 8 == 1 {
                     add_pawn_promotion(position, motion_list, current, current - 9);
                 } else {
-                    add_pawn_motion(position, motion_list, current, current - 9);
+                    add_capture_motion(position, motion_list, current, current - 9);
                 }
             }
         }
@@ -800,7 +926,7 @@ pub fn gen_black_captures(motion_list: &mut Vec<Motion>, position: &Position) {
         while kn_moves != 0 {
             let next = LSB!(kn_moves) as usize;
 
-            add_knight_motion(position, motion_list, current, next);
+            add_capture_motion(position, motion_list, current, next);
 
             kn_moves ^= 1 << next;
         }
@@ -814,7 +940,7 @@ pub fn gen_black_captures(motion_list: &mut Vec<Motion>, position: &Position) {
         while bishop_moves != 0 {
             let next = LSB!(bishop_moves) as usize;
 
-            add_bishop_motion(position, motion_list, current, next);
+            add_capture_motion(position, motion_list, current, next);
 
             bishop_moves ^= 1 << next;
         }
@@ -828,7 +954,7 @@ pub fn gen_black_captures(motion_list: &mut Vec<Motion>, position: &Position) {
         while rook_moves != 0 {
             let next = LSB!(rook_moves) as usize;
 
-            add_rook_motion(position, motion_list, current, next);
+            add_capture_motion(position, motion_list, current, next);
 
             rook_moves ^= 1 << next;
         }
@@ -842,7 +968,7 @@ pub fn gen_black_captures(motion_list: &mut Vec<Motion>, position: &Position) {
         while queen_moves != 0 {
             let next = LSB!(queen_moves) as usize;
 
-            add_queen_motion(position, motion_list, current, next);
+            add_capture_motion(position, motion_list, current, next);
 
             queen_moves ^= 1 << next;
         }
@@ -854,7 +980,7 @@ pub fn gen_black_captures(motion_list: &mut Vec<Motion>, position: &Position) {
     while king_moves != 0 {
         let next = LSB!(king_moves) as usize;
 
-        add_king_motion(position, motion_list, current, next);
+        add_capture_motion(position, motion_list, current, next);
 
         king_moves ^= 1 << next;
     }

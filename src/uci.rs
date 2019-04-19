@@ -74,6 +74,11 @@ pub fn uci_loop(){
                             println!("({} -> {})", i, transform_white(i))
                         }
                     }
+                    "think" => {
+                        let mut si = SearchInfo::new();
+                        si.stop_time = 10000;
+                        think(&mut pos, &mut si , 6);    
+                    },
                     _ => ()
                 }
 
@@ -153,7 +158,7 @@ pub fn parse_go(pos: &mut Position, words: Vec<&str>) {
             si.stop_time += black_time;
         }
     }
-    think(pos, &mut si);
+    think(pos, &mut si, 30);
 
 }
 
@@ -196,16 +201,18 @@ pub fn parse_move(pos: &Position, m: &str) -> Motion {
         }
 
         return Motion {
-        motion: MOVE_INT!(from as u16, to as u16, prom as u16, Flag::PROMOTION as u16),
-        score: 0
+            motion: MOVE_INT!(from as u16, to as u16, prom as u16, Flag::PROMOTION as u16),
+            score: 0,
+            capture: false
         };
 
     } else {
 
         if pos.ep == to as i32 {
             return Motion {
-            motion: MOVE_INT!(from as u16, to as u16, 0, Flag::ENPASSANT as u16),
-            score: 0
+                motion: MOVE_INT!(from as u16, to as u16, 0, Flag::ENPASSANT as u16),
+                score: 0,
+                capture: false
             };
         }
 
@@ -213,15 +220,17 @@ pub fn parse_move(pos: &Position, m: &str) -> Motion {
 
             if to - from == 2 || from - to == 2 {
                 return Motion {
-                motion: MOVE_INT!(from as u16, to as u16, 0, Flag::CASTLING as u16),
-                score: 0
+                    motion: MOVE_INT!(from as u16, to as u16, 0, Flag::CASTLING as u16),
+                    score: 0,
+                    capture: false
                 };
             }
         }
 
         return Motion {
-        motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
-        score: 0
+            motion: MOVE_INT!(from as u16, to as u16, 0, Flag::NONE as u16),
+            score: 0,
+            capture: false
         };
     }
  
