@@ -88,7 +88,7 @@ pub fn order(list: &mut Vec<Motion>, index: usize){
 }
 
 
-pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, info: &mut SearchInfo, null: bool) -> i32 {
+pub fn alpha_beta(mut alpha: i32, beta: i32, mut depth: i32, pos: &mut Position, info: &mut SearchInfo, null: bool) -> i32 {
     
     if depth == 0 {
         return quiescence(alpha, beta, pos, info);
@@ -102,6 +102,16 @@ pub fn alpha_beta(mut alpha: i32, beta: i32, depth: i32, pos: &mut Position, inf
 
     if check_3_fold(pos) || pos.fifty >= 100 {
         return 0;
+    }
+
+    if pos.side_to_move {
+        if is_attacked_by(pos, pos.king_sq[0] as usize, false) {
+            depth += 1;
+        } 
+    } else {
+        if is_attacked_by(pos, pos.king_sq[1] as usize, true) {
+            depth += 1;
+        } 
     }
 
     let mut list: Vec<Motion> = vec![];
@@ -221,7 +231,15 @@ pub fn think(pos: &mut Position, info: &mut SearchInfo, d: i32){
             Some(t) => *t,
             _ => panic!("PANIC IN THINKING")
         };
-        print!("info score cp {} depth {} nodes {} nps {} move ", best_score, depth, info.nodes, info.nps());
+        print!("info ");
+        if best_score > MATE - 100 {
+            print!("mate {} ", (MATE-best_score)/2 + (MATE-best_score)%2);
+        } else if best_score < -MATE + 100 {
+            print!("mate -{} ", (MATE+best_score)/2 + (MATE+best_score)%2);
+        } else {
+            print!("score cp {} ", best_score);
+        }
+        print!("depth {} nodes {} nps {} move ", depth, info.nodes, info.nps());
         print_move(&Motion {
             motion: best_move,
             score: 0,

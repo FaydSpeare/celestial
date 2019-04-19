@@ -15,14 +15,14 @@ pub const PAWN_TABLE: [i32; 64] = [   0,   0,   0,   0,   0,   0,   0,   0,
                                       0,   0,   0,   0,   0,   0,   0,   0, 
                                     ];
 
-pub const KNIGHT_TABLE: [i32; 64] = [   0,   0,   0,   0,   0,   0,   0,   0, 
+pub const KNIGHT_TABLE: [i32; 64] = [ -10,   0,   0,   0,   0,   0,   0, -10, 
                                         0,   0,   5,   5,   5,   5,   0,   0, 
                                         0,   5,  10,  10,  10,  10,   5,   0, 
                                         0,   5,  10,  15,  15,  10,   5,   0, 
                                         0,   5,  10,  15,  15,  10,   5,   0, 
                                         0,   5,  10,  10,  10,  10,   5,   0,  
                                         0,   0,   5,   5,   5,   5,   0,   0, 
-                                        0,   0,   0,   0,   0,   0,   0,   0, 
+                                      -10,   0,   0,   0,   0,   0,   0, -10, 
                                     ];
 
 pub const BISHOP_TABLE: [i32; 64] = [   0,   0,   0,   0,   0,   0,   0,   0, 
@@ -75,14 +75,6 @@ pub fn transform_white(i: i32) -> usize {
 
 pub fn eval(pos: &Position) -> i32 {
 
-    /*
-    if pos.side_to_move && is_attacked_by(pos, pos.king_sq[0] as usize, false) {
-        return MATE - pos.search_ply;
-    } else if !pos.side_to_move && is_attacked_by(pos, pos.king_sq[1] as usize, true) {
-        return -MATE + pos.search_ply;
-    }
-    */
-    
     let mut eval = 0;
 
     eval += pos.material[0];
@@ -149,18 +141,13 @@ pub fn eval(pos: &Position) -> i32 {
     for i in 0..pos.piece_list[Piece::B_QUEEN as usize].len() {
         eval -= KNIGHT_TABLE[(pos.piece_list[Piece::B_QUEEN as usize][i]) as usize];
     }
-    /*
-    if pos.ply < 10 {
-        if pos.side_to_move { eval += 5 } else { eval -= 5 }
-    }
-    */
 
     for i in 0..pos.piece_list[Piece::W_ROOK as usize].len() {
         let file = pos.piece_list[Piece::W_ROOK as usize][i] % 8;
         if FILE_MASK[file as usize] & pos.piece_bb[Piece::W_PAWN as usize] == 0 {
-            eval += 20;
+            eval += 25;
             if FILE_MASK[file as usize] & pos.piece_bb[Piece::B_PAWN as usize] == 0 {
-                eval += 10;
+                eval += 12;
             }
         }
     } 
@@ -168,12 +155,33 @@ pub fn eval(pos: &Position) -> i32 {
     for i in 0..pos.piece_list[Piece::B_ROOK as usize].len() {
         let file = pos.piece_list[Piece::B_ROOK as usize][i] % 8;
         if FILE_MASK[file as usize] & pos.piece_bb[Piece::B_PAWN as usize] == 0 {
-            eval -= 20;
+            eval -= 25;
             if FILE_MASK[file as usize] & pos.piece_bb[Piece::W_PAWN as usize] == 0 {
-                eval -= 10;
+                eval -= 12;
             }
         }
     } 
+
+    for i in 0..pos.piece_list[Piece::W_QUEEN as usize].len() {
+        let file = pos.piece_list[Piece::W_QUEEN as usize][i] % 8;
+        if FILE_MASK[file as usize] & pos.piece_bb[Piece::W_PAWN as usize] == 0 {
+            eval += 15;
+            if FILE_MASK[file as usize] & pos.piece_bb[Piece::B_PAWN as usize] == 0 {
+                eval += 8;
+            }
+        }
+    } 
+
+    for i in 0..pos.piece_list[Piece::B_QUEEN as usize].len() {
+        let file = pos.piece_list[Piece::B_QUEEN as usize][i] % 8;
+        if FILE_MASK[file as usize] & pos.piece_bb[Piece::B_PAWN as usize] == 0 {
+            eval -= 15;
+            if FILE_MASK[file as usize] & pos.piece_bb[Piece::W_PAWN as usize] == 0 {
+                eval -= 8;
+            }
+        }
+    } 
+
     for i in 0..8 {
         if (pos.piece_bb[Piece::W_PAWN as usize] & FILE_MASK[i]).count_ones() > 1 {
             eval -= 20;
@@ -188,7 +196,13 @@ pub fn eval(pos: &Position) -> i32 {
             }
         }
     }
-    
+
+    if pos.piece_num[Piece::W_BISHOP as usize] > 1 {
+        eval += 25;
+    }
+    if pos.piece_num[Piece::B_BISHOP as usize] > 1 {
+        eval -= 25;
+    }
     
     if !pos.side_to_move {
         return -eval;
