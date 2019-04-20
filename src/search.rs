@@ -233,9 +233,9 @@ pub fn think(pos: &mut Position, info: &mut SearchInfo, d: i32){
         };
         print!("info ");
         if best_score > MATE - 100 {
-            print!("mate {} ", (MATE-best_score)/2 + (MATE-best_score)%2);
+            print!("score mate {} ", (MATE-best_score)/2 + (MATE-best_score)%2);
         } else if best_score < -MATE + 100 {
-            print!("mate -{} ", (MATE+best_score)/2 + (MATE+best_score)%2);
+            print!("score mate -{} ", (MATE+best_score)/2 + (MATE+best_score)%2);
         } else {
             print!("score cp {} ", best_score);
         }
