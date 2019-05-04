@@ -245,15 +245,11 @@ impl Position {
         if self.side_to_move {
             if is_attacked_by(self, self.king_sq[Colour::BLACK as usize] as usize, true) {
                 self.undo_motion();
-                //println!("illegal");
-                //println!("{}", self.king_sq[Colour::BLACK as usize]);
                 return false;
             }
         } else {
             if is_attacked_by(self, self.king_sq[Colour::WHITE as usize] as usize, false) {
                 self.undo_motion();
-                //println!("illegal");
-                //println!("{}", self.king_sq[Colour::WHITE as usize]);
                 return false;
             }
         }

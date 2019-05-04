@@ -1,37 +1,41 @@
+//! This module does stuff.
+//!
+//! It does this really well.
+
 use crate::movegen::*;
 use crate::types::*;
 use crate::position::*;
 use crate::bitboard::*;
 
+/// Determines whether the square is attacked by the specified attacker.
+/// 
+/// # Arguments
+/// 
+/// * 'p' - A Reference to the chess position
+/// 
 pub fn is_attacked_by(p: &Position, sq: usize, attacker: bool) -> bool {
 
     if is_attacked_by_pawn(p, sq, attacker) {
-        //println!("1");
         return true;
     }
 
     if is_attacked_by_knight(p, sq, attacker) {
-        //println!("2");
         return true;
     }
 
     if is_attacked_by_bishop(p, sq, attacker) {
-        //println!("3");
         return true;
     }
 
     if is_attacked_by_rook(p, sq, attacker) {
-        //println!("4");
         return true;
     }
 
     if is_attacked_by_queen(p, sq, attacker) {
-        //println!("5");
         return true;
     }
 
     if is_attacked_by_king(p, sq, attacker) {
-        //println!("6");
         return true;
     }
 
