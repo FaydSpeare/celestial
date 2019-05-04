@@ -110,7 +110,4 @@ pub fn init(){
             CASTLE_KEYS[i] = rng.gen::<u64>();
         }
     }
-
-    
-    
 }

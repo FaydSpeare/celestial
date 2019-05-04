@@ -19,7 +19,6 @@ pub fn print_move(motion: &Motion){
             print!("{}", 'n');
         }
     }
-    //println!();
 }
 
 pub fn print_moves(list: &Vec<Motion>){
